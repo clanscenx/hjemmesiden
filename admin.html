@@ -136,23 +136,34 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
 .evt-row .etime { font-size:12px;color:var(--muted); }
 .evt-row .eprice { font-size:13px;font-weight:600;text-align:right; }
 
-/* Event detail */
-.evt-detail { background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-top:10px;overflow:hidden;display:none; }
-.evt-detail.open { display:block; }
-.evt-detail-head { padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
-.evt-detail-head h3 { font-size:16px;font-weight:700;letter-spacing:-.02em; }
-.evt-detail-head .sub { font-size:12px;color:var(--muted);margin-top:2px; }
-.evt-detail-body { padding:16px;display:grid;gap:12px; }
-.det-sections { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
-.det-sec { background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:14px; }
-.det-sec h4 { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px; }
-.nf { display:flex;flex-direction:column;gap:4px;margin-bottom:10px; }
-.nf:last-child { margin-bottom:0; }
+/* Event detail – full page */
+.evt-detail-page { position:fixed;inset:0;background:var(--bg);z-index:50;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto; }
+.evt-detail-page.open { transform:translateX(0); }
+.edp-nav { position:sticky;top:0;background:rgba(245,245,244,.92);backdrop-filter:blur(12px);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);z-index:2; }
+.edp-back { display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--text);background:none;border:none;cursor:pointer;padding:0; }
+.edp-actions { display:flex;gap:7px; }
+.edp-hero { padding:20px 16px 16px;border-bottom:1px solid var(--border); }
+.edp-hero .type-pill { display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px; }
+.edp-hero h2 { font-size:24px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px; }
+.edp-hero .loc { font-size:14px;color:var(--muted); }
+.edp-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border); }
+.edp-stat { background:var(--white);padding:14px 12px;display:flex;flex-direction:column;gap:3px; }
+.edp-stat .s-lbl { font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted); }
+.edp-stat .s-val { font-size:16px;font-weight:700;letter-spacing:-.02em; }
+.edp-body { padding:16px;display:flex;flex-direction:column;gap:12px; }
+.det-sec { background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden; }
+.det-sec-head { padding:12px 16px;border-bottom:1px solid var(--border); }
+.det-sec-head h4 { font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted); }
+.det-sec-body { padding:14px 16px;display:grid;gap:12px; }
+.nf { display:flex;flex-direction:column;gap:4px; }
 .nf label { font-size:11px;color:var(--muted);font-weight:500; }
 .nf .big-val { font-size:15px;font-weight:600; }
-.nf input,.nf textarea { background:var(--white);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;resize:none; }
+.nf input,.nf textarea { background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;resize:none;width:100%;box-sizing:border-box; }
 .nf input:focus,.nf textarea:focus { border-color:var(--text); }
-.two-col { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.two-col { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+.edp-footer { padding:16px;display:flex;gap:8px;border-top:1px solid var(--border);background:var(--white);position:sticky;bottom:0; }
+.edp-footer .btn { flex:1;justify-content:center; }
+.det-sections { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
 
 
 .empty { text-align:center;padding:60px 20px;color:var(--muted); }
@@ -287,6 +298,18 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Event detail full page -->
+<div class="evt-detail-page" id="evt-detail-page">
+  <nav class="edp-nav">
+    <button class="edp-back" onclick="closeEvtPage()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Kommende
+    </button>
+    <div class="edp-actions" id="edp-actions"></div>
+  </nav>
+  <div id="edp-content"></div>
+</div>
 
 <script>
 const KEY='hjulmann-v5';
@@ -433,48 +456,68 @@ function renderEvents(){
   else document.getElementById('evt-detail-panel').innerHTML='';
 }
 
-function openEvtDetail(id){openEvtId=(openEvtId===id)?null:id;renderEvents();}
+function openEvtDetail(id){openEvtPage(id);}
 
-function renderEvtDetail(ev){
-  document.getElementById('evt-detail-panel').innerHTML=`
-    <div class="evt-detail open">
-      <div class="evt-detail-head">
-        <div><h3>${ev.name}</h3><div class="sub">${ev.type}${ev.location?' · '+ev.location:''}</div></div>
-        <div style="display:flex;gap:7px">
-          <button class="btn btn-sm btn-green" onclick="doneEvent('${ev.id}')">✓ Afholdt</button>
-          <button class="btn btn-sm btn-danger" onclick="rmEvent('${ev.id}')">Slet</button>
-          <button class="btn btn-sm btn-ghost" onclick="openEvtId=null;renderEvents()">✕</button>
+function openEvtPage(id){
+  const ev=data.events.find(e=>e.id===id);if(!ev)return;
+  openEvtId=id;
+  document.getElementById('edp-actions').innerHTML=`
+    <button class="btn btn-sm btn-green" onclick="doneEvent('${ev.id}')">✓ Afholdt</button>
+    <button class="btn btn-sm btn-danger" onclick="rmEvent('${ev.id}')">Slet</button>
+  `;
+  document.getElementById('edp-content').innerHTML=`
+    <div class="edp-hero">
+      <div class="type-pill">${ev.type}</div>
+      <h2>${ev.name}</h2>
+      <div class="loc">${ev.location||'–'}</div>
+    </div>
+    <div class="edp-stats">
+      <div class="edp-stat"><div class="s-lbl">Dato</div><div class="s-val">${fmtDate(ev.date)}</div></div>
+      <div class="edp-stat"><div class="s-lbl">Tid</div><div class="s-val">${ev.startTime||'–'}${ev.endTime?'–'+ev.endTime:''}</div></div>
+      <div class="edp-stat"><div class="s-lbl">Honorar</div><div class="s-val">${ev.price?parseFloat(ev.price).toLocaleString('da-DK')+' kr':'–'}</div></div>
+    </div>
+    <div class="edp-body">
+      <div class="det-sec">
+        <div class="det-sec-head"><h4>Event detaljer</h4></div>
+        <div class="det-sec-body">
+          <div class="nf"><label>Dato</label><div class="big-val">${fmtDate(ev.date,true)}</div></div>
+          <div class="two-col">
+            <div class="nf"><label>Starttid</label><input type="time" value="${ev.startTime||''}" onchange="updEv('${ev.id}','startTime',this.value)" /></div>
+            <div class="nf"><label>Sluttid</label><input type="time" value="${ev.endTime||''}" onchange="updEv('${ev.id}','endTime',this.value)" /></div>
+          </div>
+          <div class="nf"><label>Adresse</label><input value="${ev.address||''}" onchange="updEv('${ev.id}','address',this.value)" placeholder="Vejnavn, postnr, by" /></div>
+          <div class="nf"><label>Venue</label><input value="${ev.venue||''}" onchange="updEv('${ev.id}','venue',this.value)" placeholder="Salens navn" /></div>
+          <div class="nf"><label>Honorar (kr)</label><input type="number" value="${ev.price||''}" onchange="updEv('${ev.id}','price',this.value);document.querySelector('.edp-stat:last-child .s-val').textContent=this.value?parseFloat(this.value).toLocaleString('da-DK')+' kr':'–'" placeholder="0" /></div>
+          <div class="nf"><label>Antal gæster</label><div class="big-val">${ev.guests||'–'}</div></div>
         </div>
       </div>
-      <div class="evt-detail-body">
-        <div class="det-sections">
-          <div class="det-sec">
-            <h4>Event detaljer</h4>
-            <div class="nf"><label>Dato</label><div class="big-val">${fmtDate(ev.date,true)}</div></div>
-            <div class="two-col">
-              <div class="nf"><label>Starttid</label><input type="time" value="${ev.startTime||''}" onchange="updEv('${ev.id}','startTime',this.value)" /></div>
-              <div class="nf"><label>Sluttid</label><input type="time" value="${ev.endTime||''}" onchange="updEv('${ev.id}','endTime',this.value)" /></div>
-            </div>
-            <div class="nf"><label>Adresse</label><input value="${ev.address||''}" onchange="updEv('${ev.id}','address',this.value)" placeholder="Vejnavn, postnr, by" /></div>
-            <div class="nf"><label>Venue</label><input value="${ev.venue||''}" onchange="updEv('${ev.id}','venue',this.value)" placeholder="Salens navn" /></div>
-            <div class="nf"><label>Honorar (kr)</label><input type="number" value="${ev.price||''}" onchange="updEv('${ev.id}','price',this.value)" placeholder="0" /></div>
-          </div>
-          <div class="det-sec">
-            <h4>Kunde</h4>
-            <div class="nf"><label>Navn</label><div class="big-val">${ev.name}</div></div>
-            <div class="nf"><label>Email</label><input value="${ev.email||''}" onchange="updEv('${ev.id}','email',this.value)" placeholder="Email" /></div>
-            <div class="nf"><label>Telefon</label><input value="${ev.phone||''}" onchange="updEv('${ev.id}','phone',this.value)" placeholder="12 34 56 78" /></div>
-            <div class="nf"><label>Gæster</label><div class="big-val">${ev.guests||'–'}</div></div>
-          </div>
+      <div class="det-sec">
+        <div class="det-sec-head"><h4>Kunde</h4></div>
+        <div class="det-sec-body">
+          <div class="nf"><label>Navn</label><div class="big-val">${ev.name}</div></div>
+          <div class="nf"><label>Email</label><input value="${ev.email||''}" onchange="updEv('${ev.id}','email',this.value)" placeholder="Email" /></div>
+          <div class="nf"><label>Telefon</label><input type="tel" value="${ev.phone||''}" onchange="updEv('${ev.id}','phone',this.value)" placeholder="12 34 56 78" /></div>
         </div>
-        <div class="det-sec">
-          <h4>Interne noter</h4>
-          <textarea rows="4" onchange="updEv('${ev.id}','notes',this.value)" placeholder="Udstyr, parkering, musikønsker, særlige øjeblikke..." style="width:100%">${ev.notes||''}</textarea>
+      </div>
+      <div class="det-sec">
+        <div class="det-sec-head"><h4>Interne noter</h4></div>
+        <div class="det-sec-body">
+          <div class="nf"><textarea rows="5" onchange="updEv('${ev.id}','notes',this.value)" placeholder="Udstyr, parkering, musikønsker, særlige øjeblikke...">${ev.notes||''}</textarea></div>
         </div>
       </div>
     </div>
+    <div style="height:80px"></div>
   `;
+  requestAnimationFrame(()=>document.getElementById('evt-detail-page').classList.add('open'));
 }
+
+function closeEvtPage(){
+  document.getElementById('evt-detail-page').classList.remove('open');
+  openEvtId=null;
+  renderEvents();
+}
+
+function renderEvtDetail(ev){}
 
 function renderArchive(){
   const n=data.archive.length;
@@ -501,8 +544,8 @@ function confirmInq(id){
 }
 
 function archiveInq(id){if(!confirm('Slet denne forespørgsel?'))return;data.inquiries=data.inquiries.filter(i=>i.id!==id);save(data);render();}
-function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);render();toast('Event slettet');}
-function rmEvent(id){if(!confirm('Slet dette event?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);render();}
+function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);closeEvtPage();render();toast('Event afholdt');}
+function rmEvent(id){if(!confirm('Slet dette event?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);closeEvtPage();render();toast('Event slettet');}
 function updEv(id,key,val){const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;save(data);renderOverview();}}
 function updInq(id,key,val){const q=data.inquiries.find(i=>i.id===id);if(q){q[key]=val;save(data);}}
 
