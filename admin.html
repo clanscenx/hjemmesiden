@@ -197,7 +197,7 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
     <button id="lock-btn" onclick="checkPw()">Log ind</button>
   </div>
 </div>
-<script>(function(){if(sessionStorage.getItem('hja')==='1')document.getElementById('lock').style.display='none';window.checkPw=function(){var u=document.getElementById('lock-user').value.trim();var p=document.getElementById('lock-input').value;if(u==='admin'&&p==='Alexander281i'){sessionStorage.setItem('hja','1');document.getElementById('lock').style.display='none';}else{document.getElementById('lock-err').style.display='block';document.getElementById('lock-input').value='';document.getElementById('lock-input').focus();}};})();</script>
+<script>(function(){if(sessionStorage.getItem('hja')==='1')document.getElementById('lock').style.display='none';window.checkPw=function(){var u=document.getElementById('lock-user').value.trim();var p=document.getElementById('lock-input').value;if(u==='admin'&&p==='Alexander281i'){sessionStorage.setItem('hja','1');document.getElementById('lock').style.display='none';}else{document.getElementById('lock-err').style.display='block';document.getElementById('lock-input').focus();}};})();</script>
 
 <header>
   <div class="logo">Hjulmann <span>admin</span></div>
