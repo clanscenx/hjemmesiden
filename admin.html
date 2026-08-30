@@ -31,6 +31,8 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 #lock-input:focus { border-color:var(--accent); }
 #lock-err { color:var(--red);font-size:12px;display:none; }
 #lock-btn { background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit; }
+#lock-user { background:#fff;border:1.5px solid var(--border2);border-radius:9px;padding:12px 14px;font-size:15px;font-family:inherit;outline:none;width:100%;color:var(--text); }
+#lock-user:focus { border-color:var(--accent); }
 
 header { padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);z-index:10;border-bottom:1px solid var(--border); }
 .logo { font-size:14px;font-weight:700;letter-spacing:-.02em; }
@@ -178,13 +180,14 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
 <div id="lock">
   <div id="lock-box">
     <div id="lock-logo">Hjulmann</div>
-    <p id="lock-sub">Adgangskode</p>
-    <input id="lock-input" type="password" placeholder="••••••••••" onkeydown="if(event.key==='Enter')checkPw()" autofocus />
-    <div id="lock-err">Forkert adgangskode.</div>
+    <p id="lock-sub">Log ind</p>
+    <input id="lock-user" type="text" placeholder="Brugernavn" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" autocomplete="username" />
+    <input id="lock-input" type="password" placeholder="Adgangskode" onkeydown="if(event.key==='Enter')checkPw()" autocomplete="current-password" />
+    <div id="lock-err">Forkert brugernavn eller adgangskode.</div>
     <button id="lock-btn" onclick="checkPw()">Log ind</button>
   </div>
 </div>
-<script>(function(){if(sessionStorage.getItem('hja')==='1')document.getElementById('lock').style.display='none';window.checkPw=function(){if(document.getElementById('lock-input').value==='Alexander281!'){sessionStorage.setItem('hja','1');document.getElementById('lock').style.display='none';}else{document.getElementById('lock-err').style.display='block';document.getElementById('lock-input').value='';document.getElementById('lock-input').focus();}};})();</script>
+<script>(function(){if(sessionStorage.getItem('hja')==='1')document.getElementById('lock').style.display='none';window.checkPw=function(){var u=document.getElementById('lock-user').value.trim();var p=document.getElementById('lock-input').value;if(u==='admin'&&p==='Alexander281!'){sessionStorage.setItem('hja','1');document.getElementById('lock').style.display='none';}else{document.getElementById('lock-err').style.display='block';document.getElementById('lock-input').value='';document.getElementById('lock-input').focus();}};})();</script>
 
 <header>
   <div class="logo">Hjulmann <span>admin</span></div>
