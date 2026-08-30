@@ -178,8 +178,8 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
   <div id="lock-box">
     <div id="lock-logo">Hjulmann</div>
     <p id="lock-sub">Log ind</p>
-    <input id="lock-user" type="text" placeholder="Brugernavn" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" autocomplete="username" />
-    <input id="lock-input" type="password" placeholder="Adgangskode" onkeydown="if(event.key==='Enter')checkPw()" autocomplete="current-password" />
+    <input id="lock-user" type="text" placeholder="Brugernavn" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" />
+    <input id="lock-input" type="password" placeholder="Adgangskode" onkeydown="if(event.key==='Enter')checkPw()" autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false" />
     <div id="lock-err">Forkert brugernavn eller adgangskode.</div>
     <button id="lock-btn" onclick="checkPw()">Log ind</button>
   </div>
