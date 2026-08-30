@@ -126,11 +126,30 @@ if (bookingForm) {
     btn.disabled = true;
     btn.textContent = 'Sender...';
 
+    const SB_URL = 'https://sitfbsxwlxxxaacgaytl.supabase.co';
+    const SB_KEY = 'sb_publishable_ygZnlLYEjniY1MiDoSjYQA_Wp-o-zML';
+
     try {
-      const res = await fetch('https://formspree.io/f/xgoqydez', {
-        method: 'POST', body: fd, headers: { 'Accept': 'application/json' }
+      const res = await fetch(SB_URL + '/rest/v1/inquiries', {
+        method: 'POST',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          name: fd.get('name'),
+          email: fd.get('email'),
+          phone: fd.get('phone'),
+          date: fd.get('date'),
+          location: fd.get('location'),
+          type: fd.get('type'),
+          guests: fd.get('guests'),
+          msg: fd.get('message')
+        })
       });
-      if (res.ok) {
+      if (res.ok || res.status === 201) {
         bookingForm.style.display = 'none';
         document.getElementById('bookSuccess')?.classList.add('show');
       } else {

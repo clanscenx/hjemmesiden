@@ -312,23 +312,22 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
 </div>
 
 <script>
+const SB_URL='https://sitfbsxwlxxxaacgaytl.supabase.co';
+const SB_KEY='sb_publishable_ygZnlLYEjniY1MiDoSjYQA_Wp-o-zML';
+const SB_H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+async function sbGet(path){const r=await fetch(SB_URL+path,{headers:SB_H});return r.ok?r.json():[];}
+async function sbPost(path,body){return fetch(SB_URL+path,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify(body)});}
+async function sbPatch(path,body){return fetch(SB_URL+path,{method:'PATCH',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify(body)});}
+async function sbDelete(path){return fetch(SB_URL+path,{method:'DELETE',headers:SB_H});}
+
 const KEY='hjulmann-v5';
-function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch{}return{inquiries:[],events:[],archive:[]};}
-function save(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch{}}
+function loadLocal(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch{}return{events:[]};}
+function saveLocal(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch{}}
 
-let data=load(),openEvtId=null;
-if(!data.archive)data.archive=[];
-
-if(!data.inquiries.length&&!data.events.length){
-  data.inquiries=[
-    {id:uid(),name:'Jonas Andersen',email:'jonas@example.dk',phone:'12 34 56 78',type:'Bryllup',date:'2026-09-20',guests:'50-100',location:'Roskilde',msg:'Vi søger en DJ til vores bryllup. Vi er meget glade for house og pop.',received:new Date().toISOString(),unread:true,price:''},
-    {id:uid(),name:'Sofie Laursen',email:'sofie@example.dk',phone:'87 65 43 21',type:'Fødselsdag',date:'2026-10-05',guests:'0-50',location:'København',msg:"Privat fest, 30 år. Ønsker 90'er og 00'er hits.",received:new Date().toISOString(),unread:true,price:''},
-  ];
-  data.events=[
-    {id:uid(),name:'Emma & Mads',type:'Bryllup',date:'2026-09-14',guests:'100-200',location:'Næstved',email:'emma@example.dk',phone:'',msg:'',address:'Skovvej 12, 4700 Næstved',venue:'Skovgaarden',startTime:'18:00',endTime:'02:00',notes:'Bruger eget PA. Parkering foran bygningen.',price:'4500'},
-  ];
-  save(data);
-}
+let data={inquiries:[],events:[]},openEvtId=null;
+const local=loadLocal();
+data.events=local.events||[];
 
 function uid(){return Math.random().toString(36).slice(2,10);}
 function fmtDate(s,long){if(!s)return'–';const d=new Date(s+'T00:00:00');return long?d.toLocaleDateString('da-DK',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):d.toLocaleDateString('da-DK',{day:'numeric',month:'short',year:'numeric'});}
@@ -425,9 +424,9 @@ function renderInquiries(){
   `).join('');
 }
 
-function openInq(id){
+async function openInq(id){
   const q=data.inquiries.find(i=>i.id===id);
-  if(q&&q.unread){q.unread=false;save(data);renderOverview();}
+  if(q&&q.unread){q.unread=false;await sbPatch('/rest/v1/inquiries?id=eq.'+id,{unread:false});renderOverview();}
   document.getElementById('card-'+id)?.classList.remove('unread');
   document.getElementById('qb-'+id)?.classList.toggle('open');
 }
@@ -533,21 +532,39 @@ function renderArchive(){
   `).join('');
 }
 
-function render(){renderOverview();renderInquiries();renderEvents();}
+async function render(){await loadInquiries();renderOverview();renderInquiries();renderEvents();}
 
-function confirmInq(id){
+async function loadInquiries(){
+  try{
+    const rows=await sbGet('/rest/v1/inquiries?select=*&order=received.desc');
+    data.inquiries=rows.map(r=>({...r,unread:r.unread??true,price:r.price||''}));
+  }catch{data.inquiries=[];}
+}
+
+async function confirmInq(id){
   const q=data.inquiries.find(i=>i.id===id);if(!q)return;
+  const ev={id:uid(),name:q.name,type:q.type,date:q.date,guests:q.guests,location:q.location,email:q.email,phone:q.phone,msg:q.msg,address:'',venue:'',startTime:'',endTime:'',notes:'',price:q.price||''};
+  data.events.push(ev);saveLocal({events:data.events});
+  await sbDelete('/rest/v1/inquiries?id=eq.'+id);
   data.inquiries=data.inquiries.filter(i=>i.id!==id);
-  data.events.push({id:uid(),name:q.name,type:q.type,date:q.date,guests:q.guests,location:q.location,email:q.email,phone:q.phone,msg:q.msg,address:'',venue:'',startTime:'',endTime:'',notes:'',price:q.price||''});
-  save(data);render();toast('Booking bekræftet');
+  renderOverview();renderInquiries();renderEvents();toast('Booking bekræftet');
   switchTab('events',document.querySelectorAll('.tab-btn')[2]);
 }
 
-function archiveInq(id){if(!confirm('Slet denne forespørgsel?'))return;data.inquiries=data.inquiries.filter(i=>i.id!==id);save(data);render();}
-function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);closeEvtPage();render();toast('Event afholdt');}
-function rmEvent(id){if(!confirm('Slet dette event?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);closeEvtPage();render();toast('Event slettet');}
-function updEv(id,key,val){const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;save(data);renderOverview();}}
-function updInq(id,key,val){const q=data.inquiries.find(i=>i.id===id);if(q){q[key]=val;save(data);}}
+async function archiveInq(id){
+  if(!confirm('Slet denne forespørgsel?'))return;
+  await sbDelete('/rest/v1/inquiries?id=eq.'+id);
+  data.inquiries=data.inquiries.filter(i=>i.id!==id);
+  renderOverview();renderInquiries();
+}
+
+function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;saveLocal({events:data.events});closeEvtPage();renderOverview();renderEvents();toast('Event afholdt');}
+function rmEvent(id){if(!confirm('Slet dette event?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;saveLocal({events:data.events});closeEvtPage();renderOverview();renderEvents();toast('Event slettet');}
+function updEv(id,key,val){const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;saveLocal({events:data.events});renderOverview();}}
+async function updInq(id,key,val){
+  const q=data.inquiries.find(i=>i.id===id);
+  if(q){q[key]=val;await sbPatch('/rest/v1/inquiries?id=eq.'+id,{[key]:val});}
+}
 
 function switchTab(name,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -559,13 +576,15 @@ function openModal(){document.getElementById('overlay').classList.add('open');}
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
 function overlayClick(e){if(e.target.id==='overlay')closeModal();}
 
-function addInquiry(){
+async function addInquiry(){
   const name=document.getElementById('m-name').value.trim();
   const email=document.getElementById('m-email').value.trim();
   if(!name||!email){alert('Navn og email er påkrævet.');return;}
-  data.inquiries.unshift({id:uid(),name,email,phone:document.getElementById('m-phone').value.trim(),type:document.getElementById('m-type').value,date:document.getElementById('m-date').value,guests:document.getElementById('m-guests').value,location:document.getElementById('m-location').value.trim(),msg:document.getElementById('m-msg').value.trim(),received:new Date().toISOString(),unread:true,price:''});
-  save(data);render();closeModal();toast('Forespørgsel tilføjet');
+  const inq={name,email,phone:document.getElementById('m-phone').value.trim(),type:document.getElementById('m-type').value,date:document.getElementById('m-date').value,guests:document.getElementById('m-guests').value,location:document.getElementById('m-location').value.trim(),msg:document.getElementById('m-msg').value.trim(),unread:true,price:''};
+  await sbPost('/rest/v1/inquiries',inq);
+  closeModal();toast('Forespørgsel tilføjet');
   ['m-name','m-email','m-phone','m-date','m-location','m-msg'].forEach(id=>document.getElementById(id).value='');
+  await render();
 }
 
 function exportData(){
@@ -578,4 +597,5 @@ function exportData(){
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
 render();
+setInterval(()=>{loadInquiries().then(()=>{renderOverview();renderInquiries();});},30000);
 </script>
