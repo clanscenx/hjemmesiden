@@ -492,6 +492,17 @@ footer{padding:90px clamp(18px,4vw,56px) 32px;border-top:1px solid var(--line);b
 .foot-cta h3{font-size:clamp(1.4rem,3vw,2.2rem)}
 .foot-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px;padding-bottom:56px}
 @media(max-width:760px){.foot-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){
+  .foot-grid{grid-template-columns:1fr}
+  .hero{padding-top:130px}
+  .hero-stats{gap:20px}
+  .hero-stat .num{font-size:1.5rem}
+  .hero-actions{flex-direction:column;align-items:flex-start}
+  .hero-actions .btn{width:100%;justify-content:center}
+  .foot-cta{flex-direction:column;text-align:center}
+  .foot-cta .btn{align-self:center}
+  h1{font-size:clamp(2.2rem,9vw,2.8rem)}
+}
 .foot-grid h4{font-family:'Sora',sans-serif;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--accent-2);margin-bottom:18px;font-weight:700}
 .foot-grid a{display:block;color:var(--muted);font-size:.9rem;margin-bottom:10px;transition:color .2s}
 .foot-grid a:hover{color:var(--fg)}

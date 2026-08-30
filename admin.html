@@ -51,7 +51,7 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
 .tab-panel.active { display:block; }
 
 /* Stat cards */
-.stat-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px; }
+.stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px; }
 .stat-card { background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px; }
 .stat-card .val { font-size:32px;font-weight:700;letter-spacing:-.04em;line-height:1; }
 .stat-card .lbl { font-size:12px;color:var(--muted);margin-top:5px; }
@@ -142,9 +142,6 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
 .nf input:focus,.nf textarea:focus { border-color:var(--text); }
 .two-col { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
 
-/* Archive */
-.ark-row { background:var(--white);border:1px solid var(--border);border-radius:9px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;opacity:.65; }
-.ark-row:hover { opacity:1; }
 
 .empty { text-align:center;padding:60px 20px;color:var(--muted); }
 .empty h3 { font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px; }
@@ -168,7 +165,7 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
 @media(max-width:700px) {
-  .stat-grid { grid-template-columns:1fr 1fr; }
+  .stat-grid { grid-template-columns:1fr; }
   .det-sections,.two-col { grid-template-columns:1fr; }
   .evt-table-head,.evt-row { grid-template-columns:70px 1fr 80px; }
   .evt-table-head span:nth-child(n+4),.evt-row>*:nth-child(n+4) { display:none; }
@@ -201,7 +198,6 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
   <button class="tab-btn active" onclick="switchTab('overblik',this)">Overblik</button>
   <button class="tab-btn" onclick="switchTab('forespoergsler',this)">Forespørgsler <span class="badge badge-dark" id="bf">0</span></button>
   <button class="tab-btn" onclick="switchTab('events',this)">Kommende <span class="badge badge-muted" id="be">0</span></button>
-  <button class="tab-btn" onclick="switchTab('arkiv',this)">Arkiv <span class="badge badge-muted" id="ba">0</span></button>
 </div>
 
 <main>
@@ -242,13 +238,6 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
     <div id="evt-detail-panel"></div>
   </div>
 
-  <div class="tab-panel" id="tab-arkiv">
-    <div class="toolbar" style="margin-bottom:16px">
-      <span id="ark-count" style="font-size:12px;color:var(--muted);flex:1"></span>
-      <button class="btn btn-sm btn-danger" onclick="clearArchive()">Slet arkiv</button>
-    </div>
-    <div id="ark-list"></div>
-  </div>
 </main>
 
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
@@ -307,18 +296,12 @@ function ini(n){return n.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase
 function timeAgo(iso){const diff=Date.now()-new Date(iso).getTime();const h=Math.floor(diff/3600000);if(h<1)return'Lige nu';if(h<24)return h+'t siden';const d=Math.floor(h/24);return d===1?'I går':d+' dage siden';}
 
 function renderOverview(){
-  const yr=new Date().getFullYear();
-  const doneYr=data.archive.filter(a=>a.reason==='Afholdt'&&a.date&&new Date(a.date+'T00:00:00').getFullYear()===yr).length;
   const rev=data.events.reduce((s,e)=>s+(parseFloat(e.price)||0),0);
   const unread=data.inquiries.filter(i=>i.unread).length;
   document.getElementById('stat-grid').innerHTML=`
     <div class="stat-card accent">
       <div class="val">${data.events.length}</div>
       <div class="lbl">Kommende events</div>
-    </div>
-    <div class="stat-card">
-      <div class="val">${doneYr}</div>
-      <div class="lbl">Afholdte i år</div>
     </div>
     <div class="stat-card">
       <div class="val">${data.inquiries.length}${unread?` <sup style="font-size:14px;color:var(--muted)">+${unread}</sup>`:''}  </div>
@@ -490,7 +473,7 @@ function renderArchive(){
   `).join('');
 }
 
-function render(){renderOverview();renderInquiries();renderEvents();renderArchive();}
+function render(){renderOverview();renderInquiries();renderEvents();}
 
 function confirmInq(id){
   const q=data.inquiries.find(i=>i.id===id);if(!q)return;
@@ -500,12 +483,11 @@ function confirmInq(id){
   switchTab('events',document.querySelectorAll('.tab-btn')[2]);
 }
 
-function archiveInq(id){const q=data.inquiries.find(i=>i.id===id);if(!q)return;data.inquiries=data.inquiries.filter(i=>i.id!==id);data.archive.push({...q,reason:'Afvist'});save(data);render();}
-function doneEvent(id){const ev=data.events.find(e=>e.id===id);if(!ev)return;data.events=data.events.filter(e=>e.id!==id);data.archive.push({...ev,reason:'Afholdt'});openEvtId=null;save(data);render();toast('Markeret som afholdt');}
+function archiveInq(id){if(!confirm('Slet denne forespørgsel?'))return;data.inquiries=data.inquiries.filter(i=>i.id!==id);save(data);render();}
+function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);render();toast('Event slettet');}
 function rmEvent(id){if(!confirm('Slet dette event?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;save(data);render();}
 function updEv(id,key,val){const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;save(data);renderOverview();}}
 function updInq(id,key,val){const q=data.inquiries.find(i=>i.id===id);if(q){q[key]=val;save(data);}}
-function clearArchive(){if(!confirm('Slet hele arkivet permanent?'))return;data.archive=[];save(data);render();}
 
 function switchTab(name,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
