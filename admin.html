@@ -1,0 +1,532 @@
+<title>Hjulmann Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fff; --surface: #f5f5f5; --border: #e5e5e5;
+    --text: #0a0a0a; --muted: #737373;
+    --green: #16a34a; --green-bg: #f0fdf4;
+    --amber: #d97706; --amber-bg: #fffbeb;
+    --red: #dc2626; --red-bg: #fef2f2;
+    --radius: 8px;
+  }
+
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+
+  /* Lock */
+  #lock { position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:inherit; }
+  #lock-box { width:300px;display:flex;flex-direction:column;gap:12px; }
+  #lock-box h1 { font-size:17px;font-weight:600; }
+  #lock-box p { font-size:13px;color:var(--muted); }
+  #lock-input { border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;width:100%; }
+  #lock-input:focus { border-color:var(--text); }
+  #lock-err { color:var(--red);font-size:12px;display:none; }
+  #lock-btn { background:var(--text);color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit; }
+
+  header { border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;background:var(--bg);z-index:10; }
+  .logo { font-weight:600;font-size:15px; }
+  .logo span { color:var(--muted);font-weight:400; }
+
+  /* Stats bar */
+  .stats-bar { display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg);padding:0 24px; }
+  .stat-pill { padding:10px 20px 10px 0;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted); }
+  .stat-pill strong { color:var(--text);font-weight:600; }
+  .stat-pill + .stat-pill { border-left:1px solid var(--border);padding-left:20px; }
+
+  .tabs { display:flex;border-bottom:1px solid var(--border);padding:0 24px;background:var(--bg); }
+  .tab-btn { padding:11px 16px;font-size:13px;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px;font-family:inherit; }
+  .tab-btn.active { color:var(--text);border-bottom-color:var(--text); }
+
+  .badge { background:var(--text);color:#fff;border-radius:100px;font-size:11px;font-weight:600;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px; }
+  .badge.green { background:var(--green); }
+  .badge.amber { background:var(--amber); }
+
+  main { padding:20px 24px;max-width:900px;width:100%;margin:0 auto; }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  .toolbar { display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
+  .toolbar-left { flex:1;display:flex;align-items:center;gap:10px; }
+  .search-wrap { position:relative; }
+  .search-wrap input { border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px 7px 30px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;width:200px; }
+  .search-wrap input:focus { border-color:var(--text); }
+  .search-icon { position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none; }
+  .filter-select { border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;appearance:none;cursor:pointer; }
+
+  .btn { border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;transition:background .1s; }
+  .btn:hover { background:var(--surface); }
+  .btn-primary { background:var(--text);color:#fff;border-color:var(--text); }
+  .btn-primary:hover { background:#222; }
+  .btn-sm { padding:5px 10px;font-size:12px; }
+  .btn-ghost { border-color:transparent; }
+  .btn-ghost:hover { background:var(--surface); }
+  .btn-red { background:var(--red-bg);color:var(--red);border-color:#fecaca; }
+
+  .card { border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden; }
+  .card.unread { border-left:3px solid var(--text); }
+
+  .card-header { padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer; }
+  .card-header:hover { background:var(--surface); }
+
+  .avatar { width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;color:var(--muted); }
+
+  .card-main { flex:1;min-width:0; }
+  .card-name { font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+
+  .tag { font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--muted); }
+  .tag.new { background:var(--text);color:#fff;border-color:var(--text); }
+
+  .card-sub { color:var(--muted);font-size:12px;margin-top:2px; }
+  .card-meta { font-size:11px;color:var(--muted);margin-top:4px; }
+  .card-actions { display:flex;gap:6px;align-items:center;flex-shrink:0; }
+
+  .card-body { display:none;padding:14px 16px 16px;border-top:1px solid var(--border); }
+  .card-body.open { display:block; }
+
+  .fields { display:grid;grid-template-columns:repeat(2,1fr);gap:14px; }
+  .field label { display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px; }
+  .field-value { font-size:13px; }
+  .field-value.msg { background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;white-space:pre-wrap; }
+
+  .action-row { display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap; }
+  .action-row-right { margin-left:auto;display:flex;gap:6px; }
+
+  /* Price input inline */
+  .price-wrap { display:flex;align-items:center;gap:6px;margin-left:auto; }
+  .price-wrap label { font-size:12px;color:var(--muted);white-space:nowrap; }
+  .price-input { border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;width:90px;outline:none;text-align:right; }
+  .price-input:focus { border-color:var(--text); }
+
+  /* Events */
+  .event-card { border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px; }
+  .event-header { display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer; }
+  .event-header:hover { background:var(--surface); }
+
+  .date-box { background:var(--text);color:#fff;border-radius:6px;padding:6px 10px;text-align:center;min-width:46px;flex-shrink:0; }
+  .date-box .day { font-size:18px;font-weight:700;line-height:1; }
+  .date-box .mon { font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase; }
+
+  .event-info { flex:1;min-width:0; }
+  .event-name { font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+  .event-meta { color:var(--muted);font-size:12px;margin-top:2px; }
+
+  .event-body { display:none;padding:16px;border-top:1px solid var(--border); }
+  .event-body.open { display:block; }
+
+  .notes-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+  .note-full { grid-column:1/-1; }
+  .nf { display:flex;flex-direction:column;gap:4px; }
+  .nf label { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase; }
+  .nf input,.nf textarea,.nf select { border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;resize:none;appearance:none; }
+  .nf input:focus,.nf textarea:focus,.nf select:focus { border-color:var(--text); }
+
+  /* Archive tab */
+  .archive-card { border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;opacity:.7; }
+  .archive-card:hover { opacity:1; }
+
+  /* Empty */
+  .empty { text-align:center;padding:60px 20px;color:var(--muted); }
+  .empty-icon { font-size:32px;margin-bottom:12px; }
+  .empty h3 { font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px; }
+
+  /* Modal */
+  .overlay { position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;display:none;align-items:center;justify-content:center;padding:16px; }
+  .overlay.open { display:flex; }
+  .modal { background:var(--bg);border-radius:12px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15); }
+  .modal-head { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+  .modal-head h2 { font-size:15px;font-weight:600; }
+  .modal-body { padding:20px;display:grid;gap:12px; }
+  .modal-foot { padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px; }
+  .form-row { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+  .fg { display:flex;flex-direction:column;gap:4px; }
+  .fg.full { grid-column:1/-1; }
+  .fg label { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase; }
+  .fg input,.fg select,.fg textarea { border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;appearance:none;resize:vertical; }
+  .fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--text); }
+
+  .toast { position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;z-index:200;transition:transform .25s;pointer-events:none; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  .divider { height:1px;background:var(--border);margin:16px 0; }
+
+  @media(max-width:600px) { .fields,.notes-grid,.form-row { grid-template-columns:1fr; } .search-wrap input { width:140px; } }
+</style>
+
+<!-- Lock screen -->
+<div id="lock">
+  <div id="lock-box">
+    <h1>Hjulmann Admin</h1>
+    <p>Indtast adgangskode for at fortsætte.</p>
+    <input id="lock-input" type="password" placeholder="Adgangskode" onkeydown="if(event.key==='Enter')checkPw()" autofocus />
+    <div id="lock-err">Forkert adgangskode.</div>
+    <button id="lock-btn" onclick="checkPw()">Log ind</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  if(sessionStorage.getItem('hjadmin-auth')==='1') document.getElementById('lock').style.display='none';
+  window.checkPw = function(){
+    if(document.getElementById('lock-input').value==='Alexander281!'){
+      sessionStorage.setItem('hjadmin-auth','1');
+      document.getElementById('lock').style.display='none';
+    } else {
+      document.getElementById('lock-err').style.display='block';
+      document.getElementById('lock-input').value='';
+      document.getElementById('lock-input').focus();
+    }
+  };
+})();
+</script>
+
+<header>
+  <div class="logo">Hjulmann <span>Admin</span></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-sm" onclick="exportData()">↓ Eksport</button>
+    <button class="btn btn-primary btn-sm" onclick="openModal()">+ Ny forespørgsel</button>
+  </div>
+</header>
+
+<div class="stats-bar" id="stats-bar"></div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('forespoergsler',this)">Forespørgsler <span class="badge" id="bf">0</span></button>
+  <button class="tab-btn" onclick="switchTab('events',this)">Kommende events <span class="badge green" id="be">0</span></button>
+  <button class="tab-btn" onclick="switchTab('arkiv',this)">Arkiv <span class="badge" style="background:var(--muted)" id="ba">0</span></button>
+</div>
+
+<main>
+  <div class="tab-panel active" id="tab-forespoergsler">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-wrap">
+          <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="search-inq" placeholder="Søg navn, email..." oninput="renderInquiries()" />
+        </div>
+        <select class="filter-select" id="filter-type" onchange="renderInquiries()">
+          <option value="">Alle typer</option>
+          <option>Bryllup</option><option>Fødselsdag</option><option>Konfirmation</option>
+          <option>Firmafest</option><option>Privatfest</option><option>Andet</option>
+        </select>
+      </div>
+      <span id="inq-count" style="font-size:13px;color:var(--muted)"></span>
+    </div>
+    <div id="inq-list"></div>
+  </div>
+
+  <div class="tab-panel" id="tab-events">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-wrap">
+          <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="search-evt" placeholder="Søg navn..." oninput="renderEvents()" />
+        </div>
+      </div>
+      <span id="evt-count" style="font-size:13px;color:var(--muted)"></span>
+    </div>
+    <div id="evt-list"></div>
+  </div>
+
+  <div class="tab-panel" id="tab-arkiv">
+    <div class="toolbar">
+      <span id="ark-count" style="font-size:13px;color:var(--muted)"></span>
+      <button class="btn btn-sm btn-red" onclick="clearArchive()">Slet arkiv</button>
+    </div>
+    <div id="ark-list"></div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Ny forespørgsel</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="fg"><label>Navn *</label><input id="m-name" placeholder="Fuldt navn" /></div>
+        <div class="fg"><label>Email *</label><input id="m-email" type="email" placeholder="din@email.dk" /></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Telefon</label><input id="m-phone" type="tel" placeholder="12 34 56 78" /></div>
+        <div class="fg"><label>Eventtype</label>
+          <select id="m-type"><option>Bryllup</option><option>Fødselsdag</option><option>Konfirmation</option><option>Firmafest</option><option>Privatfest</option><option>Andet</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Dato</label><input id="m-date" type="date" /></div>
+        <div class="fg"><label>Antal gæster</label>
+          <select id="m-guests"><option>0-50</option><option>50-100</option><option>100-200</option><option>200-400</option><option>400+</option></select>
+        </div>
+      </div>
+      <div class="fg full"><label>By / Venue</label><input id="m-location" placeholder="F.eks. Roskilde, Næstved..." /></div>
+      <div class="fg full"><label>Besked</label><textarea id="m-msg" rows="3" placeholder="Tema, musikønsker, særlige øjeblikke..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">Annuller</button>
+      <button class="btn btn-primary" onclick="addInquiry()">Tilføj</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'hjulmann-admin-v4';
+
+function load() { try { const r=localStorage.getItem(KEY); if(r) return JSON.parse(r); } catch{} return {inquiries:[],events:[],archive:[]}; }
+function save(d) { try { localStorage.setItem(KEY,JSON.stringify(d)); } catch{} }
+
+let data = load();
+
+if(!data.archive) data.archive=[];
+
+if(!data.inquiries.length && !data.events.length) {
+  data.inquiries=[
+    {id:uid(),name:'Jonas Andersen',email:'jonas@example.dk',phone:'12 34 56 78',type:'Bryllup',date:'2026-09-20',guests:'50-100',location:'Roskilde',msg:'Vi søger en DJ til vores bryllup. Vi er meget glade for house og pop.',received:new Date().toISOString(),unread:true,price:''},
+    {id:uid(),name:'Sofie Laursen',email:'sofie@example.dk',phone:'87 65 43 21',type:'Fødselsdag',date:'2026-10-05',guests:'0-50',location:'København',msg:"Privat fest, 30 år. Ønsker 90'er og 00'er hits.",received:new Date().toISOString(),unread:true,price:''},
+  ];
+  data.events=[
+    {id:uid(),name:'Emma & Mads',type:'Bryllup',date:'2026-09-14',guests:'100-200',location:'Næstved',email:'emma@example.dk',phone:'',msg:'',address:'Skovvej 12, 4700 Næstved',venue:'Skovgaarden',startTime:'18:00',endTime:'02:00',notes:'Bruger eget PA. Parkering foran bygningen.',price:'4500',status:'bekræftet'},
+  ];
+  save(data);
+}
+
+function uid() { return Math.random().toString(36).slice(2,10); }
+
+function fmtDate(s) {
+  if(!s) return '–';
+  const d=new Date(s+'T00:00:00');
+  return d.toLocaleDateString('da-DK',{day:'numeric',month:'long',year:'numeric'});
+}
+
+function fmtShort(s) {
+  if(!s) return {day:'?',mon:'–'};
+  const d=new Date(s+'T00:00:00');
+  return {day:d.getDate(),mon:d.toLocaleDateString('da-DK',{month:'short'}).replace('.','').toUpperCase()};
+}
+
+function ini(n) { return n.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase(); }
+
+function timeAgo(iso) {
+  const diff=Date.now()-new Date(iso).getTime();
+  const h=Math.floor(diff/3600000);
+  if(h<1) return 'Lige nu';
+  if(h<24) return h+'t siden';
+  const d=Math.floor(h/24);
+  return d===1?'I går':d+' dage siden';
+}
+
+function renderStats() {
+  const thisMonth=new Date().getMonth();
+  const eventsThisMonth=data.events.filter(e=>e.date&&new Date(e.date+'T00:00:00').getMonth()===thisMonth).length;
+  const totalRevenue=data.events.reduce((s,e)=>s+(parseFloat(e.price)||0),0);
+  const unread=data.inquiries.filter(i=>i.unread).length;
+  document.getElementById('stats-bar').innerHTML=`
+    <div class="stat-pill"><strong>${data.inquiries.length}</strong> forespørgsler${unread?' ('+unread+' nye)':''}</div>
+    <div class="stat-pill"><strong>${data.events.length}</strong> events denne sæson</div>
+    <div class="stat-pill"><strong>${eventsThisMonth}</strong> denne måned</div>
+    ${totalRevenue?`<div class="stat-pill"><strong>${totalRevenue.toLocaleString('da-DK')} kr</strong> samlet honorar</div>`:''}
+  `;
+}
+
+function renderInquiries() {
+  const list=document.getElementById('inq-list');
+  const q=document.getElementById('search-inq').value.toLowerCase();
+  const ft=document.getElementById('filter-type').value;
+  let items=data.inquiries.filter(i=>
+    (!q||(i.name+i.email+i.location).toLowerCase().includes(q))&&
+    (!ft||i.type===ft)
+  );
+
+  document.getElementById('bf').textContent=data.inquiries.filter(i=>i.unread).length||data.inquiries.length;
+  document.getElementById('inq-count').textContent=items.length+' vist';
+
+  if(!items.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon">📬</div><h3>${data.inquiries.length?'Ingen resultater':'Ingen forespørgsler'}</h3><p>Nye bookingønsker vises her.</p></div>`;
+    return;
+  }
+
+  list.innerHTML=items.map(q=>` 
+    <div class="card${q.unread?' unread':''}" id="card-${q.id}">
+      <div class="card-header" onclick="openInq('${q.id}')">
+        <div class="avatar">${ini(q.name)}</div>
+        <div class="card-main">
+          <div class="card-name">${q.name} ${q.unread?'<span class="tag new">Ny</span>':''} <span class="tag">${q.type}</span>${q.date?` <span class="tag">${fmtDate(q.date)}</span>`:''}</div>
+          <div class="card-sub">${q.email}${q.phone?' · '+q.phone:''}${q.guests?' · '+q.guests+' gæster':''}${q.location?' · '+q.location:''}</div>
+          <div class="card-meta">${timeAgo(q.received)}</div>
+        </div>
+        <div class="card-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-sm btn-primary" onclick="confirmInq('${q.id}')">Bekræft</button>
+          <button class="btn btn-sm" onclick="archiveInq('${q.id}')">Afvis</button>
+        </div>
+      </div>
+      <div class="card-body" id="qb-${q.id}">
+        <div class="fields">
+          <div class="field"><label>Email</label><div class="field-value"><a href="mailto:${q.email}" style="color:inherit">${q.email||'–'}</a></div></div>
+          <div class="field"><label>Telefon</label><div class="field-value">${q.phone?`<a href="tel:${q.phone}" style="color:inherit">${q.phone}</a>`:'–'}</div></div>
+          <div class="field"><label>Eventtype</label><div class="field-value">${q.type||'–'}</div></div>
+          <div class="field"><label>Antal gæster</label><div class="field-value">${q.guests||'–'}</div></div>
+          <div class="field"><label>Dato</label><div class="field-value">${fmtDate(q.date)}</div></div>
+          <div class="field"><label>By / Venue</label><div class="field-value">${q.location||'–'}</div></div>
+          ${q.msg?`<div class="field" style="grid-column:1/-1"><label>Besked</label><div class="field-value msg">${q.msg}</div></div>`:''}
+        </div>
+        <div class="action-row">
+          <button class="btn btn-primary btn-sm" onclick="confirmInq('${q.id}')">✓ Bekræft booking</button>
+          <button class="btn btn-sm" onclick="archiveInq('${q.id}')">Afvis</button>
+          <div class="price-wrap">
+            <label>Tilbudt pris</label>
+            <input class="price-input" type="number" placeholder="0" value="${q.price||''}" onchange="updInq('${q.id}','price',this.value)" /> kr
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openInq(id) {
+  const q=data.inquiries.find(i=>i.id===id);
+  if(q&&q.unread){q.unread=false;save(data);renderStats();}
+  document.getElementById('card-'+id)?.classList.remove('unread');
+  toggle('qb-'+id);
+}
+
+function renderEvents() {
+  const list=document.getElementById('evt-list');
+  const q=document.getElementById('search-evt').value.toLowerCase();
+  let items=[...data.events].filter(e=>!q||(e.name+e.location).toLowerCase().includes(q)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  document.getElementById('be').textContent=data.events.length;
+  document.getElementById('evt-count').textContent=items.length+' events';
+
+  if(!items.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">🗓</div><h3>Ingen kommende events</h3><p>Bekræftede bookings vises her.</p></div>';
+    return;
+  }
+
+  list.innerHTML=items.map(ev=>{
+    const {day,mon}=fmtShort(ev.date);
+    return `
+    <div class="event-card">
+      <div class="event-header" onclick="toggle('eb-${ev.id}')">
+        <div class="date-box"><div class="day">${day}</div><div class="mon">${mon}</div></div>
+        <div class="event-info">
+          <div class="event-name">${ev.name} <span class="tag">${ev.type}</span>${ev.price?` <span class="tag" style="color:var(--green);border-color:var(--green)">${parseFloat(ev.price).toLocaleString('da-DK')} kr</span>`:''}</div>
+          <div class="event-meta">${ev.guests?ev.guests+' gæster':''}${ev.location?' · '+ev.location:''}${ev.startTime?' · '+ev.startTime:''}${ev.endTime?'–'+ev.endTime:''}</div>
+        </div>
+        <div style="display:flex;gap:6px" onclick="event.stopPropagation()">
+          <button class="btn btn-sm" onclick="doneEvent('${ev.id}')">✓ Afholdt</button>
+          <button class="btn btn-sm btn-ghost" onclick="rmEvent('${ev.id}')">✕</button>
+        </div>
+      </div>
+      <div class="event-body" id="eb-${ev.id}">
+        <div class="notes-grid">
+          <div class="nf"><label>Adresse</label><input value="${ev.address||''}" onchange="updEv('${ev.id}','address',this.value)" placeholder="Vejnavn, postnr, by" /></div>
+          <div class="nf"><label>Venue</label><input value="${ev.venue||''}" onchange="updEv('${ev.id}','venue',this.value)" placeholder="Salens navn" /></div>
+          <div class="nf"><label>Starttid</label><input type="time" value="${ev.startTime||''}" onchange="updEv('${ev.id}','startTime',this.value)" /></div>
+          <div class="nf"><label>Sluttid</label><input type="time" value="${ev.endTime||''}" onchange="updEv('${ev.id}','endTime',this.value)" /></div>
+          <div class="nf"><label>Honorar (kr)</label><input type="number" value="${ev.price||''}" onchange="updEv('${ev.id}','price',this.value)" placeholder="0" /></div>
+          <div class="nf"><label>Kontaktperson</label><input value="${ev.email||''}" onchange="updEv('${ev.id}','email',this.value)" placeholder="Email" /></div>
+          <div class="nf note-full"><label>Noter</label><textarea rows="3" onchange="updEv('${ev.id}','notes',this.value)" placeholder="Udstyr, parkering, musikønsker...">${ev.notes||''}</textarea></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderArchive() {
+  const list=document.getElementById('ark-list');
+  const n=data.archive.length;
+  document.getElementById('ba').textContent=n;
+  document.getElementById('ark-count').textContent=n+' afviste / afholdte';
+  if(!n){list.innerHTML='<div class="empty"><div class="empty-icon">🗃</div><h3>Arkivet er tomt</h3></div>';return;}
+  list.innerHTML=[...data.archive].reverse().map(a=>`
+    <div class="archive-card">
+      <div class="avatar" style="opacity:.6">${ini(a.name)}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${a.name} <span class="tag">${a.type}</span></div>
+        <div style="font-size:12px;color:var(--muted)">${a.reason||'Afvist'} · ${fmtDate(a.date)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function render() { renderStats(); renderInquiries(); renderEvents(); renderArchive(); }
+function toggle(id) { document.getElementById(id)?.classList.toggle('open'); }
+
+function confirmInq(id) {
+  const q=data.inquiries.find(i=>i.id===id);
+  if(!q) return;
+  data.inquiries=data.inquiries.filter(i=>i.id!==id);
+  data.events.push({id:uid(),name:q.name,type:q.type,date:q.date,guests:q.guests,location:q.location,email:q.email,phone:q.phone,msg:q.msg,address:'',venue:'',startTime:'',endTime:'',notes:'',price:q.price||'',status:'bekræftet'});
+  save(data); render(); toast('Booking bekræftet ✓');
+  switchTab('events',document.querySelectorAll('.tab-btn')[1]);
+}
+
+function archiveInq(id) {
+  const q=data.inquiries.find(i=>i.id===id);
+  if(!q) return;
+  data.inquiries=data.inquiries.filter(i=>i.id!==id);
+  data.archive.push({...q,reason:'Afvist'});
+  save(data); render(); toast('Afvist og arkiveret');
+}
+
+function doneEvent(id) {
+  const ev=data.events.find(e=>e.id===id);
+  if(!ev) return;
+  data.events=data.events.filter(e=>e.id!==id);
+  data.archive.push({...ev,reason:'Afholdt'});
+  save(data); render(); toast('Event markeret som afholdt');
+}
+
+function rmEvent(id) {
+  if(!confirm('Slet dette event?')) return;
+  data.events=data.events.filter(e=>e.id!==id);
+  save(data); render(); toast('Event slettet');
+}
+
+function updEv(id,key,val) { const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;save(data);renderStats();} }
+function updInq(id,key,val) { const q=data.inquiries.find(i=>i.id===id);if(q){q[key]=val;save(data);} }
+
+function clearArchive() {
+  if(!confirm('Slet hele arkivet permanent?')) return;
+  data.archive=[]; save(data); render(); toast('Arkiv slettet');
+}
+
+function switchTab(name,btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function openModal() { document.getElementById('overlay').classList.add('open'); }
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function overlayClick(e) { if(e.target.id==='overlay') closeModal(); }
+
+function addInquiry() {
+  const name=document.getElementById('m-name').value.trim();
+  const email=document.getElementById('m-email').value.trim();
+  if(!name||!email){alert('Navn og email er påkrævet.');return;}
+  data.inquiries.unshift({id:uid(),name,email,phone:document.getElementById('m-phone').value.trim(),type:document.getElementById('m-type').value,date:document.getElementById('m-date').value,guests:document.getElementById('m-guests').value,location:document.getElementById('m-location').value.trim(),msg:document.getElementById('m-msg').value.trim(),received:new Date().toISOString(),unread:true,price:''});
+  save(data);render();closeModal();toast('Forespørgsel tilføjet');
+  ['m-name','m-email','m-phone','m-date','m-location','m-msg'].forEach(id=>document.getElementById(id).value='');
+}
+
+function exportData() {
+  const rows=[['Navn','Email','Telefon','Type','Dato','Gæster','Lokation','Besked','Modtaget']];
+  data.inquiries.forEach(q=>rows.push([q.name,q.email,q.phone,q.type,q.date,q.guests,q.location,q.msg,q.received]));
+  data.events.forEach(e=>rows.push([e.name,e.email,e.phone,e.type,e.date,e.guests,e.location,e.notes,e.price+' kr']));
+  const csv=rows.map(r=>r.map(c=>'"'+(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download='hjulmann-bookinger.csv';a.click();
+}
+
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
+
+render();
+</script>
