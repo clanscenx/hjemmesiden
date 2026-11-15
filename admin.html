@@ -2,7 +2,7 @@
 <html lang="da">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover" />
 <title>Hjulmann Events</title>
 <link rel="apple-touch-icon" href="logo.png" />
 <link rel="icon" href="logo.png" type="image/png" />
@@ -40,8 +40,8 @@
   --radius-sm:9px;
   --radius-xs:6px;
 }
-html{-webkit-tap-highlight-color:transparent;}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased;}
+html{-webkit-tap-highlight-color:transparent;overflow-x:hidden;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;touch-action:pan-y;-webkit-user-select:none;user-select:none;}
 
 /* ── Lock ── */
 #lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
@@ -225,6 +225,8 @@ main{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));max-wi
 .fg label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;}
 .fg input,.fg select,.fg textarea{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;font-size:16px;font-family:inherit;color:var(--text);outline:none;appearance:none;resize:vertical;transition:border-color .15s;}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);background:var(--surface);}
+
+input,textarea,select,.msg-box,.val a{-webkit-user-select:text;user-select:text;}
 
 /* ── Toast ── */
 .toast{position:fixed;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:11px 20px;border-radius:100px;font-size:13px;font-weight:600;z-index:200;transition:transform .22s cubic-bezier(.4,0,.2,1);pointer-events:none;box-shadow:var(--shadow-lg);white-space:nowrap;}
