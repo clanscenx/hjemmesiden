@@ -539,70 +539,80 @@ function renderOverview(){
 
 function goToEvent(id){openEvtId=id;switchTab('events',document.querySelectorAll('.tab-btn')[2]);renderEvents();}
 
+function inqStatusBadge(s){
+  if(s==='offer_sent')return'<span class="pill" style="background:#fef3c7;border-color:#fde68a;color:#92400e;">⏳ Afventer svar</span>';
+  return'<span class="pill new">NY</span>';
+}
+
 function renderInquiries(){
   const list=document.getElementById('inq-list');
   const q=(document.getElementById('search-inq').value||'').toLowerCase();
   const ft=document.getElementById('filter-type').value;
   const items=data.inquiries.filter(i=>(!q||(i.name+i.email+(i.location||'')).toLowerCase().includes(q))&&(!ft||i.type===ft));
-  document.getElementById('bf').textContent=data.inquiries.filter(i=>i.unread).length||data.inquiries.length||'0';
+  document.getElementById('bf').textContent=data.inquiries.filter(i=>i.unread||i.status==='offer_sent').length||data.inquiries.length||'0';
   document.getElementById('inq-count').textContent=items.length+' vist';
   if(!items.length){
     list.innerHTML=`<div class="empty"><div class="empty-icon">📬</div><h3>${data.inquiries.length?'Ingen resultater':'Ingen forespørgsler endnu'}</h3><p>${data.inquiries.length?'Prøv et andet søgeord.':'De vises her når nogen sender en fra hjemmesiden.'}</p></div>`;
     return;
   }
-  list.innerHTML=items.map(q=>`
-    <div class="inq-card${q.unread?' unread':''}" id="card-${q.id}">
-      <div class="inq-header" onclick="openInq('${q.id}')">
+  list.innerHTML=items.map(inq=>{
+    const offerSent=inq.status==='offer_sent';
+    return`
+    <div class="inq-card${inq.unread&&!offerSent?' unread':''}" id="card-${inq.id}">
+      <div class="inq-header" onclick="openInq('${inq.id}')">
         <div class="inq-top">
-          <div class="inq-name">${q.name}</div>
-          <div class="inq-time">${timeAgo(q.received)}</div>
+          <div class="inq-name">${inq.name}</div>
+          <div class="inq-time">${timeAgo(inq.received)}</div>
         </div>
         <div class="inq-badges">
-          ${q.unread?'<span class="pill new">NY</span>':''}
-          ${q.type?`<span class="pill">${q.type}</span>`:''}
+          ${offerSent?inqStatusBadge('offer_sent'):inq.unread?'<span class="pill new">NY</span>':''}
+          ${inq.type?`<span class="pill">${inq.type}</span>`:''}
+          ${offerSent&&inq.price?`<span class="pill" style="font-weight:700">${parseFloat(inq.price).toLocaleString('da-DK')} kr</span>`:''}
         </div>
         <div class="inq-meta">
-          ${q.date?`<div class="inq-meta-item"><div class="lbl">Dato</div><div class="val">${fmtDate(q.date)}</div></div>`:''}
-          ${q.location?`<div class="inq-meta-item"><div class="lbl">Sted</div><div class="val">${q.location}</div></div>`:''}
-          ${q.guests?`<div class="inq-meta-item"><div class="lbl">Gæster</div><div class="val">${q.guests}</div></div>`:''}
-          ${q.email?`<div class="inq-meta-item"><div class="lbl">Email</div><div class="val">${q.email}</div></div>`:''}
+          ${inq.date?`<div class="inq-meta-item"><div class="lbl">Dato</div><div class="val">${fmtDate(inq.date)}</div></div>`:''}
+          ${inq.location?`<div class="inq-meta-item"><div class="lbl">Sted</div><div class="val">${inq.location}</div></div>`:''}
+          ${inq.guests?`<div class="inq-meta-item"><div class="lbl">Gæster</div><div class="val">${inq.guests}</div></div>`:''}
+          ${inq.email?`<div class="inq-meta-item"><div class="lbl">Email</div><div class="val">${inq.email}</div></div>`:''}
         </div>
         <div class="inq-actions" onclick="event.stopPropagation()">
-          <button class="btn btn-dark btn-sm" onclick="confirmInq('${q.id}')">✓ Bekræft</button>
-          <button class="btn btn-sm" onclick="archiveInq('${q.id}')">Afvis</button>
+          ${offerSent
+            ?`<button class="btn btn-dark btn-sm" onclick="confirmInq('${inq.id}')">✓ Kunde godkendt</button>
+               <button class="btn btn-sm btn-green" onclick="openOfferModal('${inq.id}')">✉ Send igen</button>`
+            :`<button class="btn btn-dark btn-sm" onclick="openOfferModal('${inq.id}')">✉ Send tilbud</button>`
+          }
+          <button class="btn btn-sm" onclick="archiveInq('${inq.id}')">Afvis</button>
         </div>
       </div>
-      <div class="inq-body" id="qb-${q.id}">
+      <div class="inq-body" id="qb-${inq.id}">
         <div class="det-section">
           <h4>Kundeoplysninger</h4>
           <div class="det-grid">
-            <div class="det-field"><label>Navn</label><div class="val">${q.name}</div></div>
-            <div class="det-field"><label>Email</label><div class="val"><a href="mailto:${q.email}">${q.email||'–'}</a></div></div>
-            <div class="det-field"><label>Telefon</label><div class="val">${q.phone?`<a href="tel:${q.phone}">${q.phone}</a>`:'–'}</div></div>
-            <div class="det-field"><label>By / Venue</label><div class="val">${q.location||'–'}</div></div>
+            <div class="det-field"><label>Navn</label><div class="val">${inq.name}</div></div>
+            <div class="det-field"><label>Email</label><div class="val"><a href="mailto:${inq.email}">${inq.email||'–'}</a></div></div>
+            <div class="det-field"><label>Telefon</label><div class="val">${inq.phone?`<a href="tel:${inq.phone}">${inq.phone}</a>`:'–'}</div></div>
+            <div class="det-field"><label>By / Venue</label><div class="val">${inq.location||'–'}</div></div>
           </div>
         </div>
         <div class="det-section">
           <h4>Event</h4>
           <div class="det-grid">
-            <div class="det-field"><label>Dato</label><div class="val">${fmtDate(q.date,true)}</div></div>
-            <div class="det-field"><label>Type</label><div class="val">${q.type||'–'}</div></div>
-            <div class="det-field"><label>Gæster</label><div class="val">${q.guests||'–'}</div></div>
+            <div class="det-field"><label>Dato</label><div class="val">${fmtDate(inq.date,true)}</div></div>
+            <div class="det-field"><label>Type</label><div class="val">${inq.type||'–'}</div></div>
+            <div class="det-field"><label>Gæster</label><div class="val">${inq.guests||'–'}</div></div>
           </div>
         </div>
-        ${q.msg?`<div class="det-section"><h4>Besked</h4><div class="msg-box">${q.msg}</div></div>`:''}
-        <div class="action-row">
-          <button class="btn btn-dark btn-sm" onclick="confirmInq('${q.id}')">✓ Bekræft booking</button>
-          <button class="btn btn-sm" onclick="archiveInq('${q.id}')">Afvis</button>
-          <div class="price-wrap">
-            <label>Tilbudt pris</label>
-            <input class="price-input" id="price-${q.id}" type="number" placeholder="0" value="${q.price||''}" onchange="updInq('${q.id}','price',this.value)" /> kr
-            ${q.email?`<button class="btn btn-sm btn-green" onclick="openOfferModal('${q.id}')">✉ Send tilbud</button>`:''}
-          </div>
+        ${inq.msg?`<div class="det-section"><h4>Besked</h4><div class="msg-box">${inq.msg}</div></div>`:''}
+        <div class="action-row" style="flex-wrap:wrap;gap:8px;">
+          ${offerSent
+            ?`<button class="btn btn-dark" style="flex:1" onclick="confirmInq('${inq.id}')">✓ Kunde sagde ja — opret booking</button>`
+            :`<button class="btn btn-dark" style="flex:1" onclick="openOfferModal('${inq.id}')">✉ Send tilbudspris</button>`
+          }
+          <button class="btn btn-sm btn-danger" onclick="archiveInq('${inq.id}')">Afvis</button>
         </div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 async function openInq(id){
@@ -750,7 +760,8 @@ function openOfferModal(id){
   const priceEl=document.getElementById('price-'+id);
   document.getElementById('offer-to').textContent=q.name+' · '+q.email;
   document.getElementById('offer-price').value=priceEl?.value||q.price||'';
-  document.getElementById('offer-msg').value=`Hej ${q.name.split(' ')[0]}!\n\nTak for din forespørgsel. Jeg kan tilbyde dig DJ til jeres ${(q.type||'event').toLowerCase()}${q.date?' d. '+fmtDate(q.date):''}${q.location?' i '+q.location:''}.\n\nPris: ${priceEl?.value||q.price||'__'} kr.\n\nSkriv endelig tilbage hvis du har spørgsmål.\n\nMed venlig hilsen\nAlexander Hjulmann\nHjulmann Events\ninfo@hjulmann-events.dk`;
+  const p=priceEl?.value||q.price||'';
+  document.getElementById('offer-msg').value=`Hej ${q.name.split(' ')[0]}!\n\nTak for din forespørgsel — det lyder som et fedt event!\n\nJeg kan tilbyde dig DJ til jeres ${(q.type||'event').toLowerCase()}${q.date?' d. '+fmtDate(q.date):''}${q.location?' i '+q.location:''}.\n\nMin pris for aftenen er ${p?parseFloat(p).toLocaleString('da-DK')+' kr':'______ kr'}.\n\nSkriv endelig tilbage hvis du har spørgsmål eller vil booke — så laver vi det officielt.\n\nMed venlig hilsen\nAlexander Hjulmann\nHjulmann Events\ninfo@hjulmann-events.dk`;
   document.getElementById('overlay-offer').classList.add('open');
 }
 function closeOfferModal(){document.getElementById('overlay-offer').classList.remove('open');offerInqId=null;}
@@ -759,11 +770,16 @@ function sendOffer(){
   const price=document.getElementById('offer-price').value;
   const msg=document.getElementById('offer-msg').value.trim();
   if(!price){alert('Udfyld prisen.');return;}
-  if(price)updInq(offerInqId,'price',price);
+  updInq(offerInqId,'price',price);
+  updInq(offerInqId,'status','offer_sent');
+  q.price=price;q.status='offer_sent';
   const subject=encodeURIComponent('Tilbud fra Hjulmann Events');
   const body=encodeURIComponent(msg);
-  window.location.href=`mailto:${q.email}?subject=${subject}&body=${body}`;
+  const mailto=`mailto:${q.email}?subject=${subject}&body=${body}`;
+  window.open(mailto,'_self');
   closeOfferModal();
+  renderInquiries();renderOverview();
+  toast('Tilbud sendt — afventer kundens svar');
 }
 
 function openQuickModal(){document.getElementById('q-date').value=new Date().toISOString().slice(0,10);document.getElementById('overlay-quick').classList.add('open');setTimeout(()=>document.getElementById('q-date').focus(),100);}
