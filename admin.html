@@ -346,7 +346,7 @@ main{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));max-wi
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeOfferModal()">Annuller</button>
-      <button class="btn btn-dark" id="offer-send-btn" onclick="sendOffer()">Send tilbud</button>
+      <button class="btn btn-dark" onclick="sendOffer()">Åbn mail →</button>
     </div>
   </div>
 </div>
@@ -754,30 +754,16 @@ function openOfferModal(id){
   document.getElementById('overlay-offer').classList.add('open');
 }
 function closeOfferModal(){document.getElementById('overlay-offer').classList.remove('open');offerInqId=null;}
-async function sendOffer(){
+function sendOffer(){
   const q=data.inquiries.find(i=>i.id===offerInqId);if(!q)return;
   const price=document.getElementById('offer-price').value;
   const msg=document.getElementById('offer-msg').value.trim();
   if(!price){alert('Udfyld prisen.');return;}
-  const btn=document.getElementById('offer-send-btn');
-  btn.disabled=true;btn.textContent='Sender...';
-  try{
-    await emailjs.send('service_gt28jpc','template_offer',{
-      to_name:q.name,
-      to_email:q.email,
-      price:parseFloat(price).toLocaleString('da-DK')+' kr',
-      event_date:fmtDate(q.date,true),
-      event_location:q.location||'',
-      event_type:q.type||'',
-      message:msg
-    });
-    await updInq(offerInqId,'price',price);
-    closeOfferModal();
-    toast('✓ Tilbud sendt til '+q.email);
-  }catch(e){
-    toast('Fejl: kunne ikke sende — tjek EmailJS template');
-  }
-  btn.disabled=false;btn.textContent='Send tilbud';
+  if(price)updInq(offerInqId,'price',price);
+  const subject=encodeURIComponent('Tilbud fra Hjulmann Events');
+  const body=encodeURIComponent(msg);
+  window.location.href=`mailto:${q.email}?subject=${subject}&body=${body}`;
+  closeOfferModal();
 }
 
 function openQuickModal(){document.getElementById('q-date').value=new Date().toISOString().slice(0,10);document.getElementById('overlay-quick').classList.add('open');setTimeout(()=>document.getElementById('q-date').focus(),100);}
