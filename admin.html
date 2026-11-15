@@ -331,6 +331,26 @@ main{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));max-wi
   </div>
 </main>
 
+<!-- Send tilbud modal -->
+<div class="overlay" id="overlay-offer" onclick="if(event.target.id==='overlay-offer')closeOfferModal()">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-head">
+      <h2>Send tilbud til kunde</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeOfferModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Kunde</label><div id="offer-to" style="font-size:14px;font-weight:600;padding:4px 0;"></div></div>
+      <div class="fg"><label>Pris (kr) *</label><input id="offer-price" type="number" placeholder="0" /></div>
+      <div class="fg"><label>Besked til kunden</label><textarea id="offer-msg" rows="4" placeholder="Hej! Tak for din forespørgsel. Jeg kan tilbyde dig..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeOfferModal()">Annuller</button>
+      <button class="btn btn-dark" id="offer-send-btn" onclick="sendOffer()">Send tilbud</button>
+    </div>
+  </div>
+</div>
+
 <!-- Hurtig aftale modal -->
 <div class="overlay" id="overlay-quick" onclick="if(event.target.id==='overlay-quick')closeQuickModal()">
   <div class="modal">
@@ -574,7 +594,11 @@ function renderInquiries(){
         <div class="action-row">
           <button class="btn btn-dark btn-sm" onclick="confirmInq('${q.id}')">✓ Bekræft booking</button>
           <button class="btn btn-sm" onclick="archiveInq('${q.id}')">Afvis</button>
-          <div class="price-wrap"><label>Tilbudt pris</label><input class="price-input" type="number" placeholder="0" value="${q.price||''}" onchange="updInq('${q.id}','price',this.value)" /> kr</div>
+          <div class="price-wrap">
+            <label>Tilbudt pris</label>
+            <input class="price-input" id="price-${q.id}" type="number" placeholder="0" value="${q.price||''}" onchange="updInq('${q.id}','price',this.value)" /> kr
+            ${q.email?`<button class="btn btn-sm btn-green" onclick="openOfferModal('${q.id}')">✉ Send tilbud</button>`:''}
+          </div>
         </div>
       </div>
     </div>
@@ -719,6 +743,43 @@ function overlayClick(e){if(e.target.id==='overlay')closeModal();}
 function openEvtModal(){document.getElementById('overlay-evt').classList.add('open');}
 function closeEvtModal(){document.getElementById('overlay-evt').classList.remove('open');}
 function overlayEvtClick(e){if(e.target.id==='overlay-evt')closeEvtModal();}
+let offerInqId=null;
+function openOfferModal(id){
+  const q=data.inquiries.find(i=>i.id===id);if(!q)return;
+  offerInqId=id;
+  const priceEl=document.getElementById('price-'+id);
+  document.getElementById('offer-to').textContent=q.name+' · '+q.email;
+  document.getElementById('offer-price').value=priceEl?.value||q.price||'';
+  document.getElementById('offer-msg').value=`Hej ${q.name.split(' ')[0]}!\n\nTak for din forespørgsel. Jeg kan tilbyde dig DJ til jeres ${(q.type||'event').toLowerCase()}${q.date?' d. '+fmtDate(q.date):''}${q.location?' i '+q.location:''}.\n\nPris: ${priceEl?.value||q.price||'__'} kr.\n\nSkriv endelig tilbage hvis du har spørgsmål.\n\nMed venlig hilsen\nAlexander Hjulmann\nHjulmann Events\ninfo@hjulmann-events.dk`;
+  document.getElementById('overlay-offer').classList.add('open');
+}
+function closeOfferModal(){document.getElementById('overlay-offer').classList.remove('open');offerInqId=null;}
+async function sendOffer(){
+  const q=data.inquiries.find(i=>i.id===offerInqId);if(!q)return;
+  const price=document.getElementById('offer-price').value;
+  const msg=document.getElementById('offer-msg').value.trim();
+  if(!price){alert('Udfyld prisen.');return;}
+  const btn=document.getElementById('offer-send-btn');
+  btn.disabled=true;btn.textContent='Sender...';
+  try{
+    await emailjs.send('service_gt28jpc','template_offer',{
+      to_name:q.name,
+      to_email:q.email,
+      price:parseFloat(price).toLocaleString('da-DK')+' kr',
+      event_date:fmtDate(q.date,true),
+      event_location:q.location||'',
+      event_type:q.type||'',
+      message:msg
+    });
+    await updInq(offerInqId,'price',price);
+    closeOfferModal();
+    toast('✓ Tilbud sendt til '+q.email);
+  }catch(e){
+    toast('Fejl: kunne ikke sende — tjek EmailJS template');
+  }
+  btn.disabled=false;btn.textContent='Send tilbud';
+}
+
 function openQuickModal(){document.getElementById('q-date').value=new Date().toISOString().slice(0,10);document.getElementById('overlay-quick').classList.add('open');setTimeout(()=>document.getElementById('q-date').focus(),100);}
 function closeQuickModal(){document.getElementById('overlay-quick').classList.remove('open');}
 function addQuickEvent(){
