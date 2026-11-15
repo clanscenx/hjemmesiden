@@ -140,7 +140,7 @@ if (bookingForm) {
     };
 
     try {
-      await emailjs.send('service_dpcdlwa', 'template_3o4hyik', templateParams);
+      await emailjs.send('service_gt28jpc', 'template_3o4hyik', templateParams);
 
       // Also try Supabase (best effort, silent fail)
       fetch(SB_URL + '/rest/v1/inquiries', {
