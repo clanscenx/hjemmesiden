@@ -730,8 +730,26 @@ function exportData(){
 
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400);}
 
-function requestNotifPerm(){if('Notification' in window&&Notification.permission==='default'){Notification.requestPermission();}}
 function sendNotif(title,body){if('Notification' in window&&Notification.permission==='granted'){new Notification(title,{body,icon:'logo.png'});}}
+
+async function enableNotifications(){
+  if(!('Notification' in window)){toast('Notifikationer understøttes ikke');return;}
+  if(Notification.permission==='granted'){toast('Notifikationer er allerede aktiveret ✓');return;}
+  const p=await Notification.requestPermission();
+  if(p==='granted'){toast('Notifikationer aktiveret ✓');renderNotifBanner();}
+  else{toast('Notifikationer blev ikke tilladt');}
+}
+
+function renderNotifBanner(){
+  const existing=document.getElementById('notif-banner');
+  if(existing)existing.remove();
+  if(!('Notification' in window)||Notification.permission==='granted')return;
+  const banner=document.createElement('div');
+  banner.id='notif-banner';
+  banner.style.cssText='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:var(--shadow-sm);';
+  banner.innerHTML='<div><div style="font-size:13px;font-weight:600;">Få besked om nye forespørgsler</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Tryk for at aktivere notifikationer</div></div><button class="btn btn-dark btn-sm" onclick="enableNotifications()">Aktiver</button>';
+  document.getElementById('tab-overblik').prepend(banner);
+}
 
 let prevInqCount=null;
 async function pollInquiries(){
@@ -745,7 +763,6 @@ async function pollInquiries(){
   renderOverview();renderInquiries();
 }
 
-render().then(()=>{prevInqCount=data.inquiries.length;});
-requestNotifPerm();
+render().then(()=>{prevInqCount=data.inquiries.length;renderNotifBanner();});
 setInterval(pollInquiries,30000);
 </script>
