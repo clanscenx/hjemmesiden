@@ -129,8 +129,21 @@ if (bookingForm) {
     const SB_URL = 'https://sitfbsxwlxxxaacgaytl.supabase.co';
     const SB_KEY = 'sb_publishable_ygZnlLYEjniY1MiDoSjYQA_Wp-o-zML';
 
+    const templateParams = {
+      from_name: fd.get('name'),
+      from_email: fd.get('email'),
+      phone: fd.get('phone'),
+      date: fd.get('date'),
+      location: fd.get('location'),
+      guests: fd.get('guests'),
+      message: fd.get('message')
+    };
+
     try {
-      const res = await fetch(SB_URL + '/rest/v1/inquiries', {
+      await emailjs.send('service_dpcdlwa', 'template_3o4hyik', templateParams);
+
+      // Also try Supabase (best effort, silent fail)
+      fetch(SB_URL + '/rest/v1/inquiries', {
         method: 'POST',
         headers: {
           'apikey': SB_KEY,
@@ -148,15 +161,10 @@ if (bookingForm) {
           guests: fd.get('guests'),
           msg: fd.get('message')
         })
-      });
-      if (res.ok || res.status === 201) {
-        bookingForm.style.display = 'none';
-        document.getElementById('bookSuccess')?.classList.add('show');
-      } else {
-        if (status) { status.textContent = 'Noget gik galt. Prøv igen eller ring direkte.'; status.style.color = '#ff6b6b'; }
-        btn.disabled = false;
-        btn.textContent = 'Send forespørgsel →';
-      }
+      }).catch(() => {});
+
+      bookingForm.style.display = 'none';
+      document.getElementById('bookSuccess')?.classList.add('show');
     } catch {
       if (status) { status.textContent = 'Noget gik galt. Prøv igen eller ring direkte.'; status.style.color = '#ff6b6b'; }
       btn.disabled = false;
