@@ -7,225 +7,281 @@
 <link rel="apple-touch-icon" href="logo.png" />
 <link rel="icon" href="logo.png" type="image/png" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Hjulmann Events" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #f5f5f4;
-  --white: #ffffff;
-  --border: #e5e5e3;
-  --border2: #d4d4d2;
-  --text: #1a1a18;
-  --muted: #78787a;
-  --muted2: #b0b0ae;
-  --accent: #1a1a18;
-  --green: #16a34a;
-  --green-bg: #f0fdf4;
-  --green-border: #bbf7d0;
-  --red: #dc2626;
-  --red-bg: #fef2f2;
-  --radius: 12px;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f2f2f0;
+  --surface:#ffffff;
+  --surface2:#f8f8f7;
+  --border:#e8e8e6;
+  --border2:#d8d8d6;
+  --text:#1a1a18;
+  --text2:#3a3a38;
+  --muted:#72726e;
+  --muted2:#adadaa;
+  --accent:#1a1a18;
+  --accent2:#2e2e2c;
+  --green:#059669;
+  --green-bg:#ecfdf5;
+  --green-border:#a7f3d0;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --red-border:#fecaca;
+  --blue:#2563eb;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 4px 12px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
+  --radius:14px;
+  --radius-sm:9px;
+  --radius-xs:6px;
 }
-body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+html{-webkit-tap-highlight-color:transparent;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-/* Lock */
-#lock { position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:9999; }
-#lock-box { width:300px;display:flex;flex-direction:column;gap:12px; }
-#lock-logo { font-size:22px;font-weight:700;letter-spacing:-.03em; }
-#lock-sub { font-size:13px;color:var(--muted); }
-#lock-input { background:#fff;border:1.5px solid var(--border2);border-radius:9px;padding:12px 14px;font-size:15px;font-family:inherit;outline:none;width:100%;color:var(--text); }
-#lock-input:focus { border-color:var(--accent); }
-#lock-err { color:var(--red);font-size:12px;display:none; }
-#lock-btn { background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit; }
-#lock-user { background:#fff;border:1.5px solid var(--border2);border-radius:9px;padding:12px 14px;font-size:15px;font-family:inherit;outline:none;width:100%;color:var(--text); }
-#lock-user:focus { border-color:var(--accent); }
-#lock-pw-wrap { position:relative;display:flex;align-items:center; }
-#lock-pw-wrap #lock-input { padding-right:42px; }
-#lock-eye { position:absolute;right:12px;background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center; }
+/* ── Lock ── */
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
+#lock-box{width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px;}
+#lock-logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+#lock-logo-img{width:36px;height:36px;border-radius:9px;}
+#lock-logo{font-size:20px;font-weight:800;letter-spacing:-.04em;}
+#lock-sub{font-size:13px;color:var(--muted);margin-top:-8px;}
+.lock-field{display:flex;flex-direction:column;gap:5px;}
+.lock-field label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+#lock-user,#lock-input{background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:13px 15px;font-size:16px;font-family:inherit;outline:none;width:100%;color:var(--text);transition:border-color .15s;}
+#lock-user:focus,#lock-input:focus{border-color:var(--accent);}
+#lock-err{color:var(--red);font-size:12px;display:none;background:var(--red-bg);padding:9px 12px;border-radius:var(--radius-xs);border:1px solid var(--red-border);}
+#lock-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;margin-top:2px;}
+#lock-btn:active{background:var(--accent2);}
+#lock-pw-wrap{position:relative;display:flex;align-items:center;}
+#lock-pw-wrap #lock-input{padding-right:46px;}
+#lock-eye{position:absolute;right:13px;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;display:flex;align-items:center;}
 
-header { padding:0 24px;padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:space-between;height:calc(54px + env(safe-area-inset-top));position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);z-index:10;border-bottom:1px solid var(--border); }
-.logo { font-size:14px;font-weight:700;letter-spacing:-.02em; }
-.logo span { color:var(--muted);font-weight:400; }
+/* ── Header ── */
+header{padding:0 20px;padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:space-between;height:calc(56px + env(safe-area-inset-top));position:sticky;top:0;background:rgba(242,242,240,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:20;border-bottom:1px solid var(--border);}
+.logo-wrap{display:flex;align-items:center;gap:9px;}
+.logo-img{width:28px;height:28px;border-radius:7px;}
+.logo{font-size:15px;font-weight:700;letter-spacing:-.025em;}
+.logo span{color:var(--muted);font-weight:400;}
+.header-actions{display:flex;gap:6px;}
 
-.tabs { display:flex;padding:0 24px;border-bottom:1px solid var(--border);background:#fff; }
-.tab-btn { padding:12px 14px;font-size:13px;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;font-family:inherit; }
-.tab-btn.active { color:var(--text);border-bottom-color:var(--text); }
+/* ── Tabs ── */
+.tabs{display:flex;padding:0 20px;border-bottom:1px solid var(--border);background:rgba(242,242,240,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:sticky;top:calc(56px + env(safe-area-inset-top));z-index:19;}
+.tab-btn{padding:11px 12px;font-size:13px;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:5px;font-family:inherit;transition:color .15s;}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--text);}
+.badge{border-radius:100px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;}
+.badge-dark{background:var(--text);color:#fff;}
+.badge-muted{background:var(--border);color:var(--muted);}
 
-.badge { border-radius:100px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px; }
-.badge-dark { background:var(--text);color:#fff; }
-.badge-muted { background:var(--border);color:var(--muted); }
+/* ── Main ── */
+main{padding:20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-width:860px;width:100%;margin:0 auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
 
-main { padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-width:900px;width:100%;margin:0 auto; }
-.tab-panel { display:none; }
-.tab-panel.active { display:block; }
+/* ── Buttons ── */
+.btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;transition:background .12s,border-color .12s;box-shadow:var(--shadow-sm);}
+.btn:active{background:var(--surface2);}
+.btn-dark{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.btn-dark:active{background:var(--accent2);}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:var(--radius-xs);}
+.btn-ghost{border-color:transparent;background:none;box-shadow:none;}
+.btn-ghost:active{background:var(--surface2);}
+.btn-danger{color:var(--red);background:var(--red-bg);border-color:var(--red-border);box-shadow:none;}
+.btn-green{color:var(--green);background:var(--green-bg);border-color:var(--green-border);box-shadow:none;}
 
-/* Stat cards */
-.stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px; }
-.stat-card { background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px; }
-.stat-card .val { font-size:32px;font-weight:700;letter-spacing:-.04em;line-height:1; }
-.stat-card .lbl { font-size:12px;color:var(--muted);margin-top:5px; }
-.stat-card.accent { background:var(--accent);color:#fff; }
-.stat-card.accent .lbl { color:rgba(255,255,255,.55); }
+/* ── Stat cards ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow-sm);}
+.stat-card .s-icon{font-size:20px;margin-bottom:10px;}
+.stat-card .val{font-size:28px;font-weight:800;letter-spacing:-.05em;line-height:1;}
+.stat-card .lbl{font-size:11px;color:var(--muted);margin-top:5px;font-weight:500;}
+.stat-card.accent{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.2);}
+.stat-card.accent .lbl{color:rgba(255,255,255,.5);}
 
-/* Toolbar */
-.toolbar { display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap; }
-.toolbar-left { flex:1;display:flex;align-items:center;gap:8px; }
-.search-wrap { position:relative; }
-.search-icon { position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted2);pointer-events:none;font-size:13px; }
-.search-wrap input { background:var(--white);border:1px solid var(--border);border-radius:8px;padding:8px 11px 8px 32px;font-size:13px;font-family:inherit;color:var(--text);outline:none;width:200px; }
-.search-wrap input:focus { border-color:var(--text); }
-.filter-select { background:var(--white);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-family:inherit;color:var(--text);outline:none;appearance:none;cursor:pointer; }
+/* ── Next event hero ── */
+.next-hero{background:var(--accent);color:#fff;border-radius:var(--radius);padding:20px;margin-bottom:18px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.2);display:flex;justify-content:space-between;align-items:center;gap:12px;transition:transform .12s;}
+.next-hero:active{transform:scale(.99);}
+.next-hero .nh-eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.5;margin-bottom:7px;}
+.next-hero .nh-name{font-size:19px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px;}
+.next-hero .nh-sub{font-size:13px;opacity:.6;}
+.next-hero .nh-right{text-align:right;flex-shrink:0;}
+.next-hero .nh-days{font-size:36px;font-weight:800;letter-spacing:-.05em;line-height:1;}
+.next-hero .nh-days-lbl{font-size:10px;opacity:.5;margin-top:1px;}
+.next-hero .nh-price{font-size:13px;opacity:.65;margin-top:8px;}
 
-.btn { background:var(--white);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:9px;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit; }
-.btn:hover { background:var(--bg); }
-.btn-dark { background:var(--accent);color:#fff;border-color:var(--accent); }
-.btn-dark:hover { background:#2e2e2c; }
-.btn-sm { padding:7px 14px;font-size:13px;border-radius:7px; }
-.btn-ghost { border-color:transparent;background:none; }
-.btn-ghost:hover { background:var(--bg); }
-.btn-danger { color:var(--red);background:var(--red-bg);border-color:#fecaca; }
-.btn-green { color:var(--green);background:var(--green-bg);border-color:var(--green-border); }
+/* ── Section header ── */
+.section-head{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
 
-/* Inquiry cards */
-.inq-card { background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden; }
-.inq-card.unread { border-left:3px solid var(--text); }
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.toolbar-left{flex:1;display:flex;align-items:center;gap:7px;}
+.search-wrap{position:relative;}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted2);pointer-events:none;font-size:14px;}
+.search-wrap input{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 11px 8px 32px;font-size:14px;font-family:inherit;color:var(--text);outline:none;width:190px;box-shadow:var(--shadow-sm);}
+.search-wrap input:focus{border-color:var(--accent);}
+.filter-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 11px;font-size:14px;font-family:inherit;color:var(--text);outline:none;appearance:none;cursor:pointer;box-shadow:var(--shadow-sm);}
+.inq-count-lbl{font-size:12px;color:var(--muted);margin-left:auto;}
 
-.inq-header { padding:16px;cursor:pointer; }
-.inq-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
-.inq-name { font-weight:700;font-size:16px;letter-spacing:-.02em; }
-.inq-badges { display:flex;gap:6px;align-items:center;flex-wrap:wrap; }
-.pill { font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;border:1px solid var(--border);color:var(--muted);background:var(--bg);letter-spacing:.03em;text-transform:uppercase; }
-.pill.new { background:var(--text);color:#fff;border-color:var(--text); }
-.inq-meta { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px; }
-.inq-meta-item { display:flex;flex-direction:column;gap:1px; }
-.inq-meta-item .lbl { font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em; }
-.inq-meta-item .val { font-size:13px;font-weight:500;color:var(--text); }
-.inq-time { font-size:11px;color:var(--muted2); }
-.inq-actions { display:flex;gap:8px;align-items:center;padding-top:12px;border-top:1px solid var(--border); }
-.inq-actions .btn { flex:1;justify-content:center; }
-.avatar { display:none; }
-.inq-main { flex:1;min-width:0; }
-.inq-sub { display:none; }
+/* ── Inquiry cards ── */
+.inq-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .15s;}
+.inq-card.unread{border-left:3px solid var(--text);}
+.inq-header{padding:16px;cursor:pointer;}
+.inq-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.inq-name{font-weight:700;font-size:16px;letter-spacing:-.025em;}
+.inq-time{font-size:11px;color:var(--muted2);flex-shrink:0;margin-top:2px;}
+.inq-badges{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+.pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;border:1px solid var(--border);color:var(--muted);background:var(--surface2);letter-spacing:.04em;text-transform:uppercase;}
+.pill.new{background:var(--text);color:#fff;border-color:var(--text);}
+.inq-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.inq-meta-item .lbl{font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;}
+.inq-meta-item .val{font-size:13px;font-weight:500;color:var(--text);margin-top:1px;}
+.inq-actions{display:flex;gap:7px;padding-top:12px;border-top:1px solid var(--border);}
+.inq-actions .btn{flex:1;justify-content:center;font-size:13px;}
 
-.inq-body { display:none;border-top:1px solid var(--border);padding:16px; }
-.inq-body.open { display:block; }
+.inq-body{display:none;border-top:1px solid var(--border);padding:16px;background:var(--surface2);}
+.inq-body.open{display:block;}
+.det-section{margin-bottom:16px;}
+.det-section:last-child{margin-bottom:0;}
+.det-section h4{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.det-field label{font-size:10px;color:var(--muted2);font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+.det-field .val{font-size:14px;font-weight:500;margin-top:2px;}
+.det-field .val a{color:inherit;text-decoration:underline;text-underline-offset:3px;}
+.msg-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xs);padding:12px;font-size:13px;color:var(--text2);white-space:pre-wrap;line-height:1.6;}
+.action-row{display:flex;gap:7px;padding-top:14px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap;}
+.price-wrap{margin-left:auto;display:flex;align-items:center;gap:6px;}
+.price-wrap label{font-size:12px;color:var(--muted);}
+.price-input{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xs);padding:6px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;width:85px;text-align:right;}
+.price-input:focus{border-color:var(--text);}
 
-.det-section { margin-bottom:18px; }
-.det-section h4 { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px; }
-.det-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
-.det-field { display:flex;flex-direction:column;gap:3px; }
-.det-field label { font-size:11px;color:var(--muted);font-weight:500; }
-.det-field .val { font-size:14px;font-weight:500; }
-.det-field .val a { color:inherit;text-decoration:underline;text-underline-offset:2px; }
-.msg-box { background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;color:var(--muted);white-space:pre-wrap;line-height:1.6; }
+/* ── Events table ── */
+.evt-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);}
+.evt-table-head{display:grid;grid-template-columns:88px 1fr 90px 100px 88px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.evt-table-head span{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.07em;text-transform:uppercase;}
+.evt-row{display:grid;grid-template-columns:88px 1fr 90px 100px 88px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;align-items:center;transition:background .1s;}
+.evt-row:last-child{border-bottom:none;}
+.evt-row:active{background:var(--surface2);}
+.evt-row .date{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.evt-row .ename{font-size:14px;font-weight:600;letter-spacing:-.01em;}
+.evt-row .esub{font-size:11px;color:var(--muted);margin-top:1px;}
+.evt-row .etype{font-size:12px;color:var(--muted);}
+.evt-row .etime{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.evt-row .eprice{font-size:13px;font-weight:700;text-align:right;letter-spacing:-.02em;}
 
-.action-row { display:flex;gap:7px;padding-top:14px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap; }
-.price-wrap { margin-left:auto;display:flex;align-items:center;gap:7px; }
-.price-wrap label { font-size:12px;color:var(--muted); }
-.price-input { background:var(--white);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;width:85px;text-align:right; }
-.price-input:focus { border-color:var(--text); }
+/* ── Event detail full page ── */
+.evt-detail-page{position:fixed;inset:0;background:var(--bg);z-index:50;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.evt-detail-page.open{transform:translateX(0);}
+.edp-nav{position:sticky;top:0;padding:0 16px;padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(242,242,240,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:2;}
+.edp-back{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--text);background:none;border:none;cursor:pointer;padding:0;}
+.edp-back svg{color:var(--blue);}
+.edp-actions{display:flex;gap:7px;}
+.edp-hero{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
+.edp-hero .type-pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:3px 10px;margin-bottom:10px;}
+.edp-hero h2{font-size:26px;font-weight:800;letter-spacing:-.04em;margin-bottom:4px;}
+.edp-hero .loc{font-size:14px;color:var(--muted);}
+.edp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.edp-stat{background:var(--surface);padding:14px 14px;display:flex;flex-direction:column;gap:3px;}
+.edp-stat .s-lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2);}
+.edp-stat .s-val{font-size:17px;font-weight:700;letter-spacing:-.025em;}
+.edp-body{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.det-sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);}
+.det-sec-head{padding:13px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.det-sec-head h4{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.det-sec-body{padding:16px;display:grid;gap:13px;}
+.nf{display:flex;flex-direction:column;gap:5px;}
+.nf label{font-size:10px;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.nf .big-val{font-size:16px;font-weight:600;letter-spacing:-.015em;}
+.nf input,.nf textarea{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;font-size:16px;font-family:inherit;color:var(--text);outline:none;resize:none;width:100%;}
+.nf input:focus,.nf textarea:focus{border-color:var(--accent);background:var(--surface);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.edp-footer{padding:14px 16px;padding-bottom:calc(14px + env(safe-area-inset-bottom));display:flex;gap:8px;border-top:1px solid var(--border);background:var(--surface);position:sticky;bottom:0;}
+.edp-footer .btn{flex:1;justify-content:center;padding:12px;}
 
-/* Events table */
-.evt-table { background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden; }
-.evt-table-head { display:grid;grid-template-columns:90px 1fr 100px 110px 90px;padding:10px 16px;border-bottom:1px solid var(--border); }
-.evt-table-head span { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase; }
-.evt-row { display:grid;grid-template-columns:90px 1fr 100px 110px 90px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;align-items:center; }
-.evt-row:last-child { border-bottom:none; }
-.evt-row:hover { background:var(--bg); }
-.evt-row.selected { background:var(--bg); }
-.evt-row .date { font-size:12px;color:var(--muted); }
-.evt-row .ename { font-size:14px;font-weight:600; }
-.evt-row .esub { font-size:12px;color:var(--muted);margin-top:2px; }
-.evt-row .etype { font-size:12px;color:var(--muted); }
-.evt-row .etime { font-size:12px;color:var(--muted); }
-.evt-row .eprice { font-size:13px;font-weight:600;text-align:right; }
+/* ── Empty state ── */
+.empty{text-align:center;padding:64px 24px;color:var(--muted);}
+.empty .empty-icon{font-size:36px;margin-bottom:14px;opacity:.4;}
+.empty h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.empty p{font-size:13px;line-height:1.5;}
 
-/* Event detail – full page */
-.evt-detail-page { position:fixed;inset:0;background:var(--bg);z-index:50;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto; }
-.evt-detail-page.open { transform:translateX(0); }
-.edp-nav { position:sticky;top:0;background:rgba(245,245,244,.92);backdrop-filter:blur(12px);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);z-index:2; }
-.edp-back { display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--text);background:none;border:none;cursor:pointer;padding:0; }
-.edp-actions { display:flex;gap:7px; }
-.edp-hero { padding:20px 16px 16px;border-bottom:1px solid var(--border); }
-.edp-hero .type-pill { display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px; }
-.edp-hero h2 { font-size:24px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px; }
-.edp-hero .loc { font-size:14px;color:var(--muted); }
-.edp-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border); }
-.edp-stat { background:var(--white);padding:14px 12px;display:flex;flex-direction:column;gap:3px; }
-.edp-stat .s-lbl { font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted); }
-.edp-stat .s-val { font-size:16px;font-weight:700;letter-spacing:-.02em; }
-.edp-body { padding:16px;display:flex;flex-direction:column;gap:12px; }
-.det-sec { background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden; }
-.det-sec-head { padding:12px 16px;border-bottom:1px solid var(--border); }
-.det-sec-head h4 { font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted); }
-.det-sec-body { padding:14px 16px;display:grid;gap:12px; }
-.nf { display:flex;flex-direction:column;gap:4px; }
-.nf label { font-size:11px;color:var(--muted);font-weight:500; }
-.nf .big-val { font-size:15px;font-weight:600; }
-.nf input,.nf textarea { background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;resize:none;width:100%;box-sizing:border-box; }
-.nf input:focus,.nf textarea:focus { border-color:var(--text); }
-.two-col { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
-.edp-footer { padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));display:flex;gap:8px;border-top:1px solid var(--border);background:var(--white);position:sticky;bottom:0; }
-.edp-footer .btn { flex:1;justify-content:center; }
-.det-sections { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+/* ── Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;justify-content:center;padding:0;}
+.overlay.open{display:flex;}
+@media(min-width:600px){.overlay{align-items:center;padding:16px;}}
+.modal{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);padding-bottom:env(safe-area-inset-bottom);}
+@media(min-width:600px){.modal{border-radius:var(--radius);}}
+.modal-drag{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 0;}
+@media(min-width:600px){.modal-drag{display:none;}}
+.modal-head{padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-head h2{font-size:17px;font-weight:700;letter-spacing:-.025em;}
+.modal-body{padding:18px 20px;display:grid;gap:12px;}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--surface2);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg.full{grid-column:1/-1;}
+.fg label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;}
+.fg input,.fg select,.fg textarea{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;font-size:16px;font-family:inherit;color:var(--text);outline:none;appearance:none;resize:vertical;transition:border-color .15s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);background:var(--surface);}
 
+/* ── Toast ── */
+.toast{position:fixed;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:11px 20px;border-radius:100px;font-size:13px;font-weight:600;z-index:200;transition:transform .22s cubic-bezier(.4,0,.2,1);pointer-events:none;box-shadow:var(--shadow-lg);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
 
-.empty { text-align:center;padding:60px 20px;color:var(--muted); }
-.empty h3 { font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px; }
-
-/* Modal */
-.overlay { position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center;padding:16px; }
-.overlay.open { display:flex; }
-.modal { background:var(--white);border:1px solid var(--border);border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15); }
-.modal-head { padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
-.modal-head h2 { font-size:16px;font-weight:700; }
-.modal-body { padding:20px;display:grid;gap:12px; }
-.modal-foot { padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px; }
-.form-row { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
-.fg { display:flex;flex-direction:column;gap:4px; }
-.fg.full { grid-column:1/-1; }
-.fg label { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase; }
-.fg input,.fg select,.fg textarea { background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:16px;font-family:inherit;color:var(--text);outline:none;appearance:none;resize:vertical; }
-.fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--text); }
-
-.toast { position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:200;transition:transform .22s;pointer-events:none; }
-.toast.show { transform:translateX(-50%) translateY(0); }
-
-@media(max-width:700px) {
-  .stat-grid { grid-template-columns:1fr; }
-  .det-sections,.two-col { grid-template-columns:1fr; }
-  .evt-table-head,.evt-row { grid-template-columns:70px 1fr 80px; }
-  .evt-table-head span:nth-child(n+4),.evt-row>*:nth-child(n+4) { display:none; }
-  main,header,.tabs { padding-left:16px;padding-right:16px; }
-  .search-wrap input { width:140px; }
+/* ── Responsive ── */
+@media(max-width:680px){
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .stat-grid .stat-card:last-child{grid-column:1/-1;}
+  .two-col{grid-template-columns:1fr;}
+  .evt-table-head,.evt-row{grid-template-columns:70px 1fr 80px;}
+  .evt-table-head span:nth-child(n+4),.evt-row>*:nth-child(n+4){display:none;}
+  main,header,.tabs{padding-left:16px;padding-right:16px;}
+  .search-wrap input{width:150px;}
+  .det-grid{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .modal-body{padding:16px;}
+  .modal-head{padding:14px 16px 12px;}
+  .modal-foot{padding:12px 16px;}
 }
 </style>
 
+<!-- Lock screen -->
 <div id="lock">
   <div id="lock-box">
-    <div id="lock-logo">Hjulmann</div>
-    <p id="lock-sub">Log ind</p>
-    <input id="lock-user" type="text" placeholder="Brugernavn" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" />
-    <div id="lock-pw-wrap">
-      <input id="lock-input" type="password" placeholder="Adgangskode" onkeydown="if(event.key==='Enter')checkPw()" autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false" />
-      <button id="lock-eye" type="button" onclick="var i=document.getElementById('lock-input');i.type=i.type==='password'?'text':'password';this.innerHTML=i.type==='password'?'<svg width=18 height=18 viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\'/><circle cx=\'12\' cy=\'12\' r=\'3\'/></svg>':'<svg width=18 height=18 viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24\'/><line x1=\'1\' y1=\'1\' x2=\'23\' y2=\'23\'/></svg>';" aria-label="Vis adgangskode">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
+    <div id="lock-logo-wrap">
+      <img src="logo.png" id="lock-logo-img" />
+      <div id="lock-logo">Hjulmann Events</div>
     </div>
-    <div id="lock-err">Forkert brugernavn eller adgangskode.</div>
+    <p id="lock-sub">Log ind på admin</p>
+    <div class="lock-field">
+      <label>Brugernavn</label>
+      <input id="lock-user" type="text" placeholder="admin" onkeydown="if(event.key==='Enter')document.getElementById('lock-input').focus()" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" />
+    </div>
+    <div class="lock-field">
+      <label>Adgangskode</label>
+      <div id="lock-pw-wrap">
+        <input id="lock-input" type="password" placeholder="••••••••••" onkeydown="if(event.key==='Enter')checkPw()" autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false" />
+        <button id="lock-eye" type="button" onclick="var i=document.getElementById('lock-input');i.type=i.type==='password'?'text':'password';this.innerHTML=i.type==='password'?'<svg width=18 height=18 viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\'/><circle cx=\'12\' cy=\'12\' r=\'3\'/></svg>':'<svg width=18 height=18 viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24\'/><line x1=\'1\' y1=\'1\' x2=\'23\' y2=\'23\'/></svg>';" aria-label="Vis adgangskode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="lock-err">Forkert brugernavn eller adgangskode</div>
     <button id="lock-btn" onclick="checkPw()">Log ind</button>
   </div>
 </div>
-<script>(function(){if(localStorage.getItem('hja')==='1')document.getElementById('lock').style.display='none';window.checkPw=function(){var u=document.getElementById('lock-user').value.trim();var p=document.getElementById('lock-input').value;if(u==='admin'&&p==='Alexander281i'){localStorage.setItem('hja','1');document.getElementById('lock').style.display='none';}else{document.getElementById('lock-err').style.display='block';document.getElementById('lock-input').focus();}};})();</script>
+<script>(function(){if(localStorage.getItem('hja')==='1')document.getElementById('lock').style.display='none';window.checkPw=function(){var u=document.getElementById('lock-user').value.trim();var p=document.getElementById('lock-input').value;if(u==='admin'&&p==='Alexander281i'){localStorage.setItem('hja','1');document.getElementById('lock').style.display='none';}else{var e=document.getElementById('lock-err');e.style.display='block';document.getElementById('lock-input').focus();}};})();</script>
 
 <header>
-  <div class="logo">Hjulmann <span>admin</span></div>
-  <div style="display:flex;gap:7px">
+  <div class="logo-wrap">
+    <img src="logo.png" class="logo-img" />
+    <div class="logo">Hjulmann <span>admin</span></div>
+  </div>
+  <div class="header-actions">
     <button class="btn btn-sm" onclick="exportData()">↓ CSV</button>
-    <button class="btn btn-sm" onclick="openModal()">+ Forespørgsel</button>
+    <button class="btn btn-sm" onclick="openModal()">Forespørgsel</button>
     <button class="btn btn-dark btn-sm" onclick="openEvtModal()">+ Ny aftale</button>
   </div>
 </header>
@@ -239,7 +295,6 @@ main { padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-
 <main>
   <div class="tab-panel active" id="tab-overblik">
     <div class="stat-grid" id="stat-grid"></div>
-    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Kommende events</div>
     <div id="overview-list"></div>
   </div>
 
@@ -248,7 +303,7 @@ main { padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-
       <div class="toolbar-left">
         <div class="search-wrap">
           <span class="search-icon">⌕</span>
-          <input id="search-inq" placeholder="Søg..." oninput="renderInquiries()" />
+          <input id="search-inq" placeholder="Søg navn, sted..." oninput="renderInquiries()" />
         </div>
         <select class="filter-select" id="filter-type" onchange="renderInquiries()">
           <option value="">Alle typer</option>
@@ -256,7 +311,7 @@ main { padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-
           <option>Firmafest</option><option>Privatfest</option><option>Andet</option>
         </select>
       </div>
-      <span id="inq-count" style="font-size:12px;color:var(--muted)"></span>
+      <span class="inq-count-lbl" id="inq-count"></span>
     </div>
     <div id="inq-list"></div>
   </div>
@@ -266,18 +321,19 @@ main { padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-
       <div class="toolbar-left">
         <div class="search-wrap">
           <span class="search-icon">⌕</span>
-          <input id="search-evt" placeholder="Søg..." oninput="renderEvents()" />
+          <input id="search-evt" placeholder="Søg events..." oninput="renderEvents()" />
         </div>
       </div>
+      <span class="inq-count-lbl" id="evt-count"></span>
     </div>
     <div id="evt-list"></div>
-    <div id="evt-detail-panel"></div>
   </div>
-
 </main>
 
+<!-- Forespørgsel modal -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
   <div class="modal">
+    <div class="modal-drag"></div>
     <div class="modal-head">
       <h2>Ny forespørgsel</h2>
       <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
@@ -300,13 +356,15 @@ main { padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal()">Annuller</button>
-      <button class="btn btn-dark" onclick="addInquiry()">Tilføj</button>
+      <button class="btn btn-dark" onclick="addInquiry()">Tilføj forespørgsel</button>
     </div>
   </div>
 </div>
 
+<!-- Ny aftale modal -->
 <div class="overlay" id="overlay-evt" onclick="overlayEvtClick(event)">
   <div class="modal">
+    <div class="modal-drag"></div>
     <div class="modal-head">
       <h2>Ny aftale</h2>
       <button class="btn btn-ghost btn-sm" onclick="closeEvtModal()">✕</button>
@@ -344,7 +402,7 @@ main { padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-
 <div class="evt-detail-page" id="evt-detail-page">
   <nav class="edp-nav">
     <button class="edp-back" onclick="closeEvtPage()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       Kommende
     </button>
     <div class="edp-actions" id="edp-actions"></div>
@@ -357,7 +415,7 @@ const SB_URL='https://sitfbsxwlxxxaacgaytl.supabase.co';
 const SB_KEY='sb_publishable_ygZnlLYEjniY1MiDoSjYQA_Wp-o-zML';
 const SB_H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
-async function sbGet(path){const r=await fetch(SB_URL+path,{headers:SB_H});return r.ok?r.json():[];}
+async function sbGet(path){try{const r=await fetch(SB_URL+path,{headers:SB_H});return r.ok?r.json():[];}catch{return[];}}
 async function sbPost(path,body){return fetch(SB_URL+path,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify(body)});}
 async function sbPatch(path,body){return fetch(SB_URL+path,{method:'PATCH',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify(body)});}
 async function sbDelete(path){return fetch(SB_URL+path,{method:'DELETE',headers:SB_H});}
@@ -372,38 +430,14 @@ data.events=local.events||[];
 
 function uid(){return Math.random().toString(36).slice(2,10);}
 function fmtDate(s,long){if(!s)return'–';const d=new Date(s+'T00:00:00');return long?d.toLocaleDateString('da-DK',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):d.toLocaleDateString('da-DK',{day:'numeric',month:'short',year:'numeric'});}
-function ini(n){return n.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();}
 function timeAgo(iso){const diff=Date.now()-new Date(iso).getTime();const h=Math.floor(diff/3600000);if(h<1)return'Lige nu';if(h<24)return h+'t siden';const d=Math.floor(h/24);return d===1?'I går':d+' dage siden';}
-
-function daysUntil(dateStr){if(!dateStr)return null;const d=new Date(dateStr+'T00:00:00');const today=new Date();today.setHours(0,0,0,0);return Math.round((d-today)/(1000*60*60*24));}
+function daysUntil(s){if(!s)return null;const d=new Date(s+'T00:00:00');const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/(86400000));}
 
 function renderOverview(){
   const rev=data.events.reduce((s,e)=>s+(parseFloat(e.price)||0),0);
   const unread=data.inquiries.filter(i=>i.unread).length;
   const sorted=[...data.events].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  const next=sorted.find(e=>(daysUntil(e.date)||0)>=0);
-
-  // Next event hero
-  const ovl=document.getElementById('overview-list');
-  let heroHtml='';
-  if(next){
-    const days=daysUntil(next.date);
-    const daysLabel=days===0?'I dag':days===1?'I morgen':'Om '+days+' dage';
-    heroHtml=`
-      <div onclick="goToEvent('${next.id}')" style="background:var(--accent);color:#fff;border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
-        <div>
-          <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:6px">Næste event</div>
-          <div style="font-size:20px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px">${next.name}</div>
-          <div style="font-size:13px;opacity:.65">${fmtDate(next.date)}${next.location?' · '+next.location:''}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1">${days===0?'Nu':days===1?'1':days}</div>
-          <div style="font-size:11px;opacity:.55;margin-top:2px">${days===0?'':'dage'}</div>
-          <div style="font-size:12px;opacity:.6;margin-top:6px">${next.price?parseFloat(next.price).toLocaleString('da-DK')+' kr':'–'}</div>
-        </div>
-      </div>
-    `;
-  }
+  const next=sorted.find(e=>(daysUntil(e.date)??-1)>=0);
 
   document.getElementById('stat-grid').innerHTML=`
     <div class="stat-card accent">
@@ -411,25 +445,49 @@ function renderOverview(){
       <div class="lbl">Kommende events</div>
     </div>
     <div class="stat-card">
-      <div class="val">${data.inquiries.length}${unread?` <sup style="font-size:14px;color:var(--muted)">${unread} ny</sup>`:''}</div>
-      <div class="lbl">Forespørgsler</div>
+      <div class="val">${data.inquiries.length}${unread?` <sup style="font-size:12px;color:var(--muted);font-weight:700"> +${unread}</sup>`:''}</div>
+      <div class="lbl">Forespørgsler${unread?' · '+unread+' nye':''}</div>
     </div>
     <div class="stat-card">
-      <div class="val" style="font-size:${rev>99999?'18px':rev>9999?'22px':'28px'}">${rev?rev.toLocaleString('da-DK')+' kr':'–'}</div>
+      <div class="val" style="font-size:${rev>99999?'17px':rev>9999?'22px':'28px'}">${rev?rev.toLocaleString('da-DK')+' kr':'–'}</div>
       <div class="lbl">Samlet honorar</div>
     </div>
   `;
 
-  if(!sorted.length){ovl.innerHTML='<div class="empty"><h3>Ingen kommende events</h3><p>Opret din første aftale med + Ny aftale.</p></div>';return;}
+  const ovl=document.getElementById('overview-list');
+  if(!sorted.length){
+    ovl.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><h3>Ingen kommende events</h3><p>Opret din første aftale med + Ny aftale.</p></div>';
+    return;
+  }
+
+  let heroHtml='';
+  if(next){
+    const days=daysUntil(next.date);
+    heroHtml=`
+      <div class="next-hero" onclick="goToEvent('${next.id}')">
+        <div>
+          <div class="nh-eyebrow">Næste event</div>
+          <div class="nh-name">${next.name}</div>
+          <div class="nh-sub">${fmtDate(next.date)}${next.location?' · '+next.location:''}</div>
+        </div>
+        <div class="nh-right">
+          <div class="nh-days">${days===0?'Nu':days}</div>
+          <div class="nh-days-lbl">${days===0?'':'dage'}</div>
+          <div class="nh-price">${next.price?parseFloat(next.price).toLocaleString('da-DK')+' kr':'–'}</div>
+        </div>
+      </div>
+    `;
+  }
+
   ovl.innerHTML=heroHtml+`
-    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Alle kommende</div>
+    <div class="section-head">Alle kommende</div>
     <div class="evt-table">
       <div class="evt-table-head"><span>Dato</span><span>Navn</span><span>Type</span><span>Tid</span><span style="text-align:right">Honorar</span></div>
       ${sorted.map(ev=>`
         <div class="evt-row" onclick="goToEvent('${ev.id}')">
           <div class="date">${fmtDate(ev.date)}</div>
           <div><div class="ename">${ev.name}</div><div class="esub">${ev.location||''}</div></div>
-          <div class="etype">${ev.type}</div>
+          <div class="etype">${ev.type||'–'}</div>
           <div class="etime">${ev.startTime||'–'}${ev.endTime?'–'+ev.endTime:''}</div>
           <div class="eprice">${ev.price?parseFloat(ev.price).toLocaleString('da-DK')+' kr':'–'}</div>
         </div>
@@ -444,10 +502,13 @@ function renderInquiries(){
   const list=document.getElementById('inq-list');
   const q=(document.getElementById('search-inq').value||'').toLowerCase();
   const ft=document.getElementById('filter-type').value;
-  const items=data.inquiries.filter(i=>(!q||(i.name+i.email+i.location).toLowerCase().includes(q))&&(!ft||i.type===ft));
+  const items=data.inquiries.filter(i=>(!q||(i.name+i.email+(i.location||'')).toLowerCase().includes(q))&&(!ft||i.type===ft));
   document.getElementById('bf').textContent=data.inquiries.filter(i=>i.unread).length||data.inquiries.length||'0';
   document.getElementById('inq-count').textContent=items.length+' vist';
-  if(!items.length){list.innerHTML=`<div class="empty"><h3>${data.inquiries.length?'Ingen resultater':'Ingen forespørgsler endnu'}</h3></div>`;return;}
+  if(!items.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon">📬</div><h3>${data.inquiries.length?'Ingen resultater':'Ingen forespørgsler endnu'}</h3><p>${data.inquiries.length?'Prøv et andet søgeord.':'De vises her når nogen sender en fra hjemmesiden.'}</p></div>`;
+    return;
+  }
   list.innerHTML=items.map(q=>`
     <div class="inq-card${q.unread?' unread':''}" id="card-${q.id}">
       <div class="inq-header" onclick="openInq('${q.id}')">
@@ -455,7 +516,7 @@ function renderInquiries(){
           <div class="inq-name">${q.name}</div>
           <div class="inq-time">${timeAgo(q.received)}</div>
         </div>
-        <div class="inq-badges" style="margin-bottom:10px">
+        <div class="inq-badges">
           ${q.unread?'<span class="pill new">NY</span>':''}
           ${q.type?`<span class="pill">${q.type}</span>`:''}
         </div>
@@ -481,11 +542,11 @@ function renderInquiries(){
           </div>
         </div>
         <div class="det-section">
-          <h4>Event detaljer</h4>
+          <h4>Event</h4>
           <div class="det-grid">
             <div class="det-field"><label>Dato</label><div class="val">${fmtDate(q.date,true)}</div></div>
-            <div class="det-field"><label>Type</label><div class="val">${q.type}</div></div>
-            <div class="det-field"><label>Antal gæster</label><div class="val">${q.guests||'–'}</div></div>
+            <div class="det-field"><label>Type</label><div class="val">${q.type||'–'}</div></div>
+            <div class="det-field"><label>Gæster</label><div class="val">${q.guests||'–'}</div></div>
           </div>
         </div>
         ${q.msg?`<div class="det-section"><h4>Besked</h4><div class="msg-box">${q.msg}</div></div>`:''}
@@ -508,26 +569,26 @@ async function openInq(id){
 
 function renderEvents(){
   const q=(document.getElementById('search-evt').value||'').toLowerCase();
-  const items=[...data.events].filter(e=>!q||(e.name+e.location).toLowerCase().includes(q)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const items=[...data.events].filter(e=>!q||(e.name+(e.location||'')).toLowerCase().includes(q)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   document.getElementById('be').textContent=data.events.length;
+  document.getElementById('evt-count').textContent=items.length+' events';
   const list=document.getElementById('evt-list');
-  if(!items.length){list.innerHTML='<div class="empty"><h3>Ingen kommende events</h3></div>';document.getElementById('evt-detail-panel').innerHTML='';return;}
+  if(!items.length){list.innerHTML='<div class="empty"><div class="empty-icon">📅</div><h3>Ingen kommende events</h3><p>Brug + Ny aftale til at oprette en booking.</p></div>';return;}
   list.innerHTML=`
     <div class="evt-table">
       <div class="evt-table-head"><span>Dato</span><span>Navn</span><span>Type</span><span>Tid</span><span style="text-align:right">Honorar</span></div>
       ${items.map(ev=>`
-        <div class="evt-row${openEvtId===ev.id?' selected':''}" onclick="openEvtDetail('${ev.id}')">
+        <div class="evt-row" onclick="openEvtDetail('${ev.id}')">
           <div class="date">${fmtDate(ev.date)}</div>
           <div><div class="ename">${ev.name}</div><div class="esub">${ev.location||''}</div></div>
-          <div class="etype">${ev.type}</div>
+          <div class="etype">${ev.type||'–'}</div>
           <div class="etime">${ev.startTime||'–'}${ev.endTime?'–'+ev.endTime:''}</div>
           <div class="eprice">${ev.price?parseFloat(ev.price).toLocaleString('da-DK')+' kr':'–'}</div>
         </div>
       `).join('')}
     </div>
   `;
-  if(openEvtId){const ev=data.events.find(e=>e.id===openEvtId);if(ev)renderEvtDetail(ev);else{document.getElementById('evt-detail-panel').innerHTML='';openEvtId=null;}}
-  else document.getElementById('evt-detail-panel').innerHTML='';
+  if(openEvtId){const ev=data.events.find(e=>e.id===openEvtId);if(ev)openEvtPage(openEvtId);}
 }
 
 function openEvtDetail(id){openEvtPage(id);}
@@ -541,14 +602,14 @@ function openEvtPage(id){
   `;
   document.getElementById('edp-content').innerHTML=`
     <div class="edp-hero">
-      <div class="type-pill">${ev.type}</div>
+      <div class="type-pill">${ev.type||'Event'}</div>
       <h2>${ev.name}</h2>
       <div class="loc">${ev.location||'–'}</div>
     </div>
     <div class="edp-stats">
       <div class="edp-stat"><div class="s-lbl">Dato</div><div class="s-val">${fmtDate(ev.date)}</div></div>
       <div class="edp-stat"><div class="s-lbl">Tid</div><div class="s-val">${ev.startTime||'–'}${ev.endTime?'–'+ev.endTime:''}</div></div>
-      <div class="edp-stat"><div class="s-lbl">Honorar</div><div class="s-val">${ev.price?parseFloat(ev.price).toLocaleString('da-DK')+' kr':'–'}</div></div>
+      <div class="edp-stat"><div class="s-lbl">Honorar</div><div class="s-val" id="edp-price-val">${ev.price?parseFloat(ev.price).toLocaleString('da-DK')+' kr':'–'}</div></div>
     </div>
     <div class="edp-body">
       <div class="det-sec">
@@ -561,7 +622,7 @@ function openEvtPage(id){
           </div>
           <div class="nf"><label>Adresse</label><input value="${ev.address||''}" onchange="updEv('${ev.id}','address',this.value)" placeholder="Vejnavn, postnr, by" /></div>
           <div class="nf"><label>Venue</label><input value="${ev.venue||''}" onchange="updEv('${ev.id}','venue',this.value)" placeholder="Salens navn" /></div>
-          <div class="nf"><label>Honorar (kr)</label><input type="number" value="${ev.price||''}" onchange="updEv('${ev.id}','price',this.value);document.querySelector('.edp-stat:last-child .s-val').textContent=this.value?parseFloat(this.value).toLocaleString('da-DK')+' kr':'–'" placeholder="0" /></div>
+          <div class="nf"><label>Honorar (kr)</label><input type="number" value="${ev.price||''}" onchange="updEv('${ev.id}','price',this.value);document.getElementById('edp-price-val').textContent=this.value?parseFloat(this.value).toLocaleString('da-DK')+' kr':'–'" placeholder="0" /></div>
           <div class="nf"><label>Antal gæster</label><div class="big-val">${ev.guests||'–'}</div></div>
         </div>
       </div>
@@ -587,24 +648,7 @@ function openEvtPage(id){
 
 function closeEvtPage(){
   document.getElementById('evt-detail-page').classList.remove('open');
-  openEvtId=null;
-  renderEvents();
-}
-
-function renderEvtDetail(ev){}
-
-function renderArchive(){
-  const n=data.archive.length;
-  document.getElementById('ba').textContent=n;
-  document.getElementById('ark-count').textContent=n+' poster';
-  const list=document.getElementById('ark-list');
-  if(!n){list.innerHTML='<div class="empty"><h3>Arkivet er tomt</h3></div>';return;}
-  list.innerHTML=[...data.archive].reverse().map(a=>`
-    <div class="ark-row">
-      <div class="avatar">${ini(a.name)}</div>
-      <div style="flex:1"><div style="font-weight:600;font-size:14px">${a.name} <span class="pill">${a.type}</span></div><div style="font-size:12px;color:var(--muted);margin-top:2px">${a.reason||'Afvist'} · ${fmtDate(a.date)}</div></div>
-    </div>
-  `).join('');
+  openEvtId=null;renderEvents();
 }
 
 async function render(){await loadInquiries();renderOverview();renderInquiries();renderEvents();}
@@ -622,7 +666,7 @@ async function confirmInq(id){
   data.events.push(ev);saveLocal({events:data.events});
   await sbDelete('/rest/v1/inquiries?id=eq.'+id);
   data.inquiries=data.inquiries.filter(i=>i.id!==id);
-  renderOverview();renderInquiries();renderEvents();toast('Booking bekræftet');
+  renderOverview();renderInquiries();renderEvents();toast('✓ Booking bekræftet');
   switchTab('events',document.querySelectorAll('.tab-btn')[2]);
 }
 
@@ -630,10 +674,10 @@ async function archiveInq(id){
   if(!confirm('Slet denne forespørgsel?'))return;
   await sbDelete('/rest/v1/inquiries?id=eq.'+id);
   data.inquiries=data.inquiries.filter(i=>i.id!==id);
-  renderOverview();renderInquiries();
+  renderOverview();renderInquiries();toast('Forespørgsel slettet');
 }
 
-function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;saveLocal({events:data.events});closeEvtPage();renderOverview();renderEvents();toast('Event afholdt');}
+function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;saveLocal({events:data.events});closeEvtPage();renderOverview();renderEvents();toast('✓ Event afholdt');}
 function rmEvent(id){if(!confirm('Slet dette event?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;saveLocal({events:data.events});closeEvtPage();renderOverview();renderEvents();toast('Event slettet');}
 function updEv(id,key,val){const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;saveLocal({events:data.events});renderOverview();}}
 async function updInq(id,key,val){
@@ -647,6 +691,7 @@ function switchTab(name,btn){
   btn.classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
 }
+
 function openModal(){document.getElementById('overlay').classList.add('open');}
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
 function overlayClick(e){if(e.target.id==='overlay')closeModal();}
@@ -654,27 +699,26 @@ function openEvtModal(){document.getElementById('overlay-evt').classList.add('op
 function closeEvtModal(){document.getElementById('overlay-evt').classList.remove('open');}
 function overlayEvtClick(e){if(e.target.id==='overlay-evt')closeEvtModal();}
 
+async function addInquiry(){
+  const name=document.getElementById('m-name').value.trim();
+  if(!name){alert('Navn er påkrævet.');return;}
+  const inq={name,email:document.getElementById('m-email').value.trim(),phone:document.getElementById('m-phone').value.trim(),type:document.getElementById('m-type').value,date:document.getElementById('m-date').value,guests:document.getElementById('m-guests').value,location:document.getElementById('m-location').value.trim(),msg:document.getElementById('m-msg').value.trim(),unread:true,price:''};
+  await sbPost('/rest/v1/inquiries',inq);
+  closeModal();toast('Forespørgsel tilføjet');
+  ['m-name','m-email','m-phone','m-date','m-location','m-msg'].forEach(id=>document.getElementById(id).value='');
+  await render();
+}
+
 function addEvent(){
   const name=document.getElementById('e-name').value.trim();
   const date=document.getElementById('e-date').value;
   if(!name||!date){alert('Navn og dato er påkrævet.');return;}
   const ev={id:uid(),name,type:document.getElementById('e-type').value,date,guests:document.getElementById('e-guests').value,location:document.getElementById('e-location').value.trim(),email:document.getElementById('e-email').value.trim(),phone:document.getElementById('e-phone').value.trim(),startTime:document.getElementById('e-start').value,endTime:document.getElementById('e-end').value,price:document.getElementById('e-price').value,address:'',venue:'',notes:''};
   data.events.push(ev);saveLocal({events:data.events});
-  closeEvtModal();toast('Aftale oprettet');
+  closeEvtModal();toast('✓ Aftale oprettet');
   ['e-name','e-date','e-start','e-end','e-location','e-price','e-phone','e-email'].forEach(id=>document.getElementById(id).value='');
   renderOverview();renderEvents();
   switchTab('events',document.querySelectorAll('.tab-btn')[2]);
-}
-
-async function addInquiry(){
-  const name=document.getElementById('m-name').value.trim();
-  const email=document.getElementById('m-email').value.trim();
-  if(!name){alert('Navn er påkrævet.');return;}
-  const inq={name,email,phone:document.getElementById('m-phone').value.trim(),type:document.getElementById('m-type').value,date:document.getElementById('m-date').value,guests:document.getElementById('m-guests').value,location:document.getElementById('m-location').value.trim(),msg:document.getElementById('m-msg').value.trim(),unread:true,price:''};
-  await sbPost('/rest/v1/inquiries',inq);
-  closeModal();toast('Forespørgsel tilføjet');
-  ['m-name','m-email','m-phone','m-date','m-location','m-msg'].forEach(id=>document.getElementById(id).value='');
-  await render();
 }
 
 function exportData(){
@@ -684,10 +728,10 @@ function exportData(){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);a.download='hjulmann.csv';a.click();
 }
 
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400);}
 
 function requestNotifPerm(){if('Notification' in window&&Notification.permission==='default'){Notification.requestPermission();}}
-function sendNotif(title,body){if('Notification' in window&&Notification.permission==='granted'){new Notification(title,{body,icon:'logo.png',badge:'logo.png'});}}
+function sendNotif(title,body){if('Notification' in window&&Notification.permission==='granted'){new Notification(title,{body,icon:'logo.png'});}}
 
 let prevInqCount=null;
 async function pollInquiries(){
@@ -695,7 +739,7 @@ async function pollInquiries(){
   await loadInquiries();
   if(before!==null&&data.inquiries.length>before){
     const newest=data.inquiries[0];
-    sendNotif('Ny forespørgsel 🎉',newest?newest.name+' · '+fmtDate(newest.date):'Nogen har sendt en forespørgsel');
+    sendNotif('Ny forespørgsel 🎉',newest?newest.name+(newest.date?' · '+fmtDate(newest.date):''):'');
   }
   prevInqCount=data.inquiries.length;
   renderOverview();renderInquiries();
