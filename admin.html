@@ -462,13 +462,7 @@ async function sbPost(path,body){return fetch(SB_URL+path,{method:'POST',headers
 async function sbPatch(path,body){return fetch(SB_URL+path,{method:'PATCH',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify(body)});}
 async function sbDelete(path){return fetch(SB_URL+path,{method:'DELETE',headers:SB_H});}
 
-const KEY='hjulmann-v5';
-function loadLocal(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch{}return{events:[]};}
-function saveLocal(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch{}}
-
 let data={inquiries:[],events:[]},openEvtId=null;
-const local=loadLocal();
-data.events=local.events||[];
 
 function uid(){return Math.random().toString(36).slice(2,10);}
 function fmtDate(s,long){if(!s)return'–';const d=new Date(s+'T00:00:00');return long?d.toLocaleDateString('da-DK',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):d.toLocaleDateString('da-DK',{day:'numeric',month:'short',year:'numeric'});}
@@ -707,7 +701,7 @@ function closeEvtPage(){
   openEvtId=null;renderEvents();
 }
 
-async function render(){await loadInquiries();renderOverview();renderInquiries();renderEvents();}
+async function render(){await Promise.all([loadInquiries(),loadEvents()]);renderOverview();renderInquiries();renderEvents();}
 
 async function loadInquiries(){
   try{
@@ -716,10 +710,18 @@ async function loadInquiries(){
   }catch{data.inquiries=[];}
 }
 
+async function loadEvents(){
+  try{
+    const rows=await sbGet('/rest/v1/events?select=*&order=date.asc');
+    data.events=rows.map(r=>({...r,price:r.price||'',startTime:r.startTime||'',endTime:r.endTime||'',notes:r.notes||''}));
+  }catch{data.events=[];}
+}
+
 async function confirmInq(id){
   const q=data.inquiries.find(i=>i.id===id);if(!q)return;
-  const ev={id:uid(),name:q.name,type:q.type,date:q.date,guests:q.guests,location:q.location,email:q.email,phone:q.phone,msg:q.msg,address:'',venue:'',startTime:'',endTime:'',notes:'',price:q.price||''};
-  data.events.push(ev);saveLocal({events:data.events});
+  const ev={id:uid(),name:q.name,type:q.type,date:q.date,guests:q.guests,location:q.location,email:q.email,phone:q.phone,address:'',venue:'',startTime:'',endTime:'',notes:'',price:q.price||''};
+  await sbPost('/rest/v1/events',ev);
+  data.events.push(ev);
   await sbDelete('/rest/v1/inquiries?id=eq.'+id);
   data.inquiries=data.inquiries.filter(i=>i.id!==id);
   renderOverview();renderInquiries();renderEvents();toast('✓ Booking bekræftet');
@@ -733,9 +735,9 @@ async function archiveInq(id){
   renderOverview();renderInquiries();toast('Forespørgsel slettet');
 }
 
-function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;saveLocal({events:data.events});closeEvtPage();renderOverview();renderEvents();toast('✓ Event afholdt');}
-function rmEvent(id){if(!confirm('Slet dette event?'))return;data.events=data.events.filter(e=>e.id!==id);openEvtId=null;saveLocal({events:data.events});closeEvtPage();renderOverview();renderEvents();toast('Event slettet');}
-function updEv(id,key,val){const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;saveLocal({events:data.events});renderOverview();}}
+async function doneEvent(id){if(!confirm('Marker som afholdt og slet?'))return;await sbDelete('/rest/v1/events?id=eq.'+id);data.events=data.events.filter(e=>e.id!==id);openEvtId=null;closeEvtPage();renderOverview();renderEvents();toast('✓ Event afholdt');}
+async function rmEvent(id){if(!confirm('Slet dette event?'))return;await sbDelete('/rest/v1/events?id=eq.'+id);data.events=data.events.filter(e=>e.id!==id);openEvtId=null;closeEvtPage();renderOverview();renderEvents();toast('Event slettet');}
+async function updEv(id,key,val){const ev=data.events.find(e=>e.id===id);if(ev){ev[key]=val;await sbPatch('/rest/v1/events?id=eq.'+id,{[key]:val});renderOverview();}}
 async function updInq(id,key,val){
   const q=data.inquiries.find(i=>i.id===id);
   if(q){q[key]=val;await sbPatch('/rest/v1/inquiries?id=eq.'+id,{[key]:val});}
@@ -792,11 +794,12 @@ function sendOffer(){
 
 function openQuickModal(){document.getElementById('q-date').value=new Date().toISOString().slice(0,10);document.getElementById('overlay-quick').classList.add('open');setTimeout(()=>document.getElementById('q-date').focus(),100);}
 function closeQuickModal(){document.getElementById('overlay-quick').classList.remove('open');}
-function addQuickEvent(){
+async function addQuickEvent(){
   const date=document.getElementById('q-date').value;
   if(!date){alert('Dato er påkrævet.');return;}
   const ev={id:uid(),name:'DJ job',type:'Firmafest',date,location:document.getElementById('q-location').value.trim(),price:document.getElementById('q-price').value,guests:'',email:'',phone:'',startTime:'',endTime:'',address:'',venue:'',notes:''};
-  data.events.push(ev);saveLocal({events:data.events});
+  await sbPost('/rest/v1/events',ev);
+  data.events.push(ev);
   closeQuickModal();toast('⚡ Aftale oprettet');
   ['q-location','q-price'].forEach(id=>document.getElementById(id).value='');
   renderOverview();renderEvents();
@@ -813,12 +816,13 @@ async function addInquiry(){
   await render();
 }
 
-function addEvent(){
+async function addEvent(){
   const name=document.getElementById('e-name').value.trim();
   const date=document.getElementById('e-date').value;
   if(!name||!date){alert('Navn og dato er påkrævet.');return;}
   const ev={id:uid(),name,type:document.getElementById('e-type').value,date,guests:document.getElementById('e-guests').value,location:document.getElementById('e-location').value.trim(),email:document.getElementById('e-email').value.trim(),phone:document.getElementById('e-phone').value.trim(),startTime:document.getElementById('e-start').value,endTime:document.getElementById('e-end').value,price:document.getElementById('e-price').value,address:'',venue:'',notes:''};
-  data.events.push(ev);saveLocal({events:data.events});
+  await sbPost('/rest/v1/events',ev);
+  data.events.push(ev);
   closeEvtModal();toast('✓ Aftale oprettet');
   ['e-name','e-date','e-start','e-end','e-location','e-price','e-phone','e-email'].forEach(id=>document.getElementById(id).value='');
   renderOverview();renderEvents();
