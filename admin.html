@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<title>Hjulmann Admin</title>
+<title>Hjulmann Events</title>
 <link rel="apple-touch-icon" href="logo.png" />
 <link rel="icon" href="logo.png" type="image/png" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-title" content="Hjulmann" />
+<meta name="apple-mobile-web-app-title" content="Hjulmann Events" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 
@@ -225,7 +225,8 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
   <div class="logo">Hjulmann <span>admin</span></div>
   <div style="display:flex;gap:7px">
     <button class="btn btn-sm" onclick="exportData()">↓ CSV</button>
-    <button class="btn btn-dark btn-sm" onclick="openModal()">+ Forespørgsel</button>
+    <button class="btn btn-sm" onclick="openModal()">+ Forespørgsel</button>
+    <button class="btn btn-dark btn-sm" onclick="openEvtModal()">+ Ny aftale</button>
   </div>
 </header>
 
@@ -304,6 +305,39 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
   </div>
 </div>
 
+<div class="overlay" id="overlay-evt" onclick="overlayEvtClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Ny aftale</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeEvtModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="fg"><label>Navn *</label><input id="e-name" placeholder="Kundens navn" /></div>
+        <div class="fg"><label>Eventtype</label><select id="e-type"><option>Bryllup</option><option>Fødselsdag</option><option>Konfirmation</option><option>Firmafest</option><option>Privatfest</option><option>Andet</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Dato *</label><input id="e-date" type="date" /></div>
+        <div class="fg"><label>Antal gæster</label><select id="e-guests"><option>0-50</option><option>50-100</option><option>100-200</option><option>200-400</option><option>400+</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Starttid</label><input id="e-start" type="time" /></div>
+        <div class="fg"><label>Sluttid</label><input id="e-end" type="time" /></div>
+      </div>
+      <div class="fg full"><label>Sted</label><input id="e-location" placeholder="By / venue" /></div>
+      <div class="form-row">
+        <div class="fg"><label>Honorar (kr)</label><input id="e-price" type="number" placeholder="0" /></div>
+        <div class="fg"><label>Telefon</label><input id="e-phone" type="tel" placeholder="12 34 56 78" /></div>
+      </div>
+      <div class="fg full"><label>Email</label><input id="e-email" type="email" placeholder="kunde@email.dk" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeEvtModal()">Annuller</button>
+      <button class="btn btn-dark" onclick="addEvent()">Opret aftale</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Event detail full page -->
@@ -341,28 +375,54 @@ function fmtDate(s,long){if(!s)return'–';const d=new Date(s+'T00:00:00');retur
 function ini(n){return n.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();}
 function timeAgo(iso){const diff=Date.now()-new Date(iso).getTime();const h=Math.floor(diff/3600000);if(h<1)return'Lige nu';if(h<24)return h+'t siden';const d=Math.floor(h/24);return d===1?'I går':d+' dage siden';}
 
+function daysUntil(dateStr){if(!dateStr)return null;const d=new Date(dateStr+'T00:00:00');const today=new Date();today.setHours(0,0,0,0);return Math.round((d-today)/(1000*60*60*24));}
+
 function renderOverview(){
   const rev=data.events.reduce((s,e)=>s+(parseFloat(e.price)||0),0);
   const unread=data.inquiries.filter(i=>i.unread).length;
+  const sorted=[...data.events].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const next=sorted.find(e=>(daysUntil(e.date)||0)>=0);
+
+  // Next event hero
+  const ovl=document.getElementById('overview-list');
+  let heroHtml='';
+  if(next){
+    const days=daysUntil(next.date);
+    const daysLabel=days===0?'I dag':days===1?'I morgen':'Om '+days+' dage';
+    heroHtml=`
+      <div onclick="goToEvent('${next.id}')" style="background:var(--accent);color:#fff;border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:6px">Næste event</div>
+          <div style="font-size:20px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px">${next.name}</div>
+          <div style="font-size:13px;opacity:.65">${fmtDate(next.date)}${next.location?' · '+next.location:''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1">${days===0?'Nu':days===1?'1':days}</div>
+          <div style="font-size:11px;opacity:.55;margin-top:2px">${days===0?'':'dage'}</div>
+          <div style="font-size:12px;opacity:.6;margin-top:6px">${next.price?parseFloat(next.price).toLocaleString('da-DK')+' kr':'–'}</div>
+        </div>
+      </div>
+    `;
+  }
+
   document.getElementById('stat-grid').innerHTML=`
     <div class="stat-card accent">
       <div class="val">${data.events.length}</div>
       <div class="lbl">Kommende events</div>
     </div>
     <div class="stat-card">
-      <div class="val">${data.inquiries.length}${unread?` <sup style="font-size:14px;color:var(--muted)">+${unread}</sup>`:''}  </div>
-      <div class="lbl">Forespørgsler${unread?' · '+unread+' nye':''}</div>
+      <div class="val">${data.inquiries.length}${unread?` <sup style="font-size:14px;color:var(--muted)">${unread} ny</sup>`:''}</div>
+      <div class="lbl">Forespørgsler</div>
     </div>
     <div class="stat-card">
-      <div class="val" style="font-size:22px">${rev?rev.toLocaleString('da-DK')+' kr':'–'}</div>
+      <div class="val" style="font-size:${rev>99999?'18px':rev>9999?'22px':'28px'}">${rev?rev.toLocaleString('da-DK')+' kr':'–'}</div>
       <div class="lbl">Samlet honorar</div>
     </div>
   `;
 
-  const sorted=[...data.events].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  const ovl=document.getElementById('overview-list');
-  if(!sorted.length){ovl.innerHTML='<div class="empty"><h3>Ingen kommende events</h3><p>Bekræftede bookings vises her.</p></div>';return;}
-  ovl.innerHTML=`
+  if(!sorted.length){ovl.innerHTML='<div class="empty"><h3>Ingen kommende events</h3><p>Opret din første aftale med + Ny aftale.</p></div>';return;}
+  ovl.innerHTML=heroHtml+`
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Alle kommende</div>
     <div class="evt-table">
       <div class="evt-table-head"><span>Dato</span><span>Navn</span><span>Type</span><span>Tid</span><span style="text-align:right">Honorar</span></div>
       ${sorted.map(ev=>`
@@ -590,6 +650,21 @@ function switchTab(name,btn){
 function openModal(){document.getElementById('overlay').classList.add('open');}
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
 function overlayClick(e){if(e.target.id==='overlay')closeModal();}
+function openEvtModal(){document.getElementById('overlay-evt').classList.add('open');}
+function closeEvtModal(){document.getElementById('overlay-evt').classList.remove('open');}
+function overlayEvtClick(e){if(e.target.id==='overlay-evt')closeEvtModal();}
+
+function addEvent(){
+  const name=document.getElementById('e-name').value.trim();
+  const date=document.getElementById('e-date').value;
+  if(!name||!date){alert('Navn og dato er påkrævet.');return;}
+  const ev={id:uid(),name,type:document.getElementById('e-type').value,date,guests:document.getElementById('e-guests').value,location:document.getElementById('e-location').value.trim(),email:document.getElementById('e-email').value.trim(),phone:document.getElementById('e-phone').value.trim(),startTime:document.getElementById('e-start').value,endTime:document.getElementById('e-end').value,price:document.getElementById('e-price').value,address:'',venue:'',notes:''};
+  data.events.push(ev);saveLocal({events:data.events});
+  closeEvtModal();toast('Aftale oprettet');
+  ['e-name','e-date','e-start','e-end','e-location','e-price','e-phone','e-email'].forEach(id=>document.getElementById(id).value='');
+  renderOverview();renderEvents();
+  switchTab('events',document.querySelectorAll('.tab-btn')[2]);
+}
 
 async function addInquiry(){
   const name=document.getElementById('m-name').value.trim();
@@ -611,6 +686,22 @@ function exportData(){
 
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
-render();
-setInterval(()=>{loadInquiries().then(()=>{renderOverview();renderInquiries();});},30000);
+function requestNotifPerm(){if('Notification' in window&&Notification.permission==='default'){Notification.requestPermission();}}
+function sendNotif(title,body){if('Notification' in window&&Notification.permission==='granted'){new Notification(title,{body,icon:'logo.png',badge:'logo.png'});}}
+
+let prevInqCount=null;
+async function pollInquiries(){
+  const before=prevInqCount;
+  await loadInquiries();
+  if(before!==null&&data.inquiries.length>before){
+    const newest=data.inquiries[0];
+    sendNotif('Ny forespørgsel 🎉',newest?newest.name+' · '+fmtDate(newest.date):'Nogen har sendt en forespørgsel');
+  }
+  prevInqCount=data.inquiries.length;
+  renderOverview();renderInquiries();
+}
+
+render().then(()=>{prevInqCount=data.inquiries.length;});
+requestNotifPerm();
+setInterval(pollInquiries,30000);
 </script>
