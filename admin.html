@@ -714,6 +714,19 @@ async function loadEvents(){
   try{
     const rows=await sbGet('/rest/v1/events?select=*&order=date.asc');
     data.events=rows.map(r=>({...r,price:r.price||'',startTime:r.startTime||'',endTime:r.endTime||'',notes:r.notes||''}));
+    // Migrate old localStorage events to Supabase (runs once)
+    if(rows.length===0){
+      try{
+        const old=JSON.parse(localStorage.getItem('hjulmann-v5')||'{}');
+        const legacy=(old.events||[]).filter(e=>e&&e.id&&e.name);
+        if(legacy.length>0){
+          await Promise.all(legacy.map(e=>sbPost('/rest/v1/events',{id:e.id,name:e.name,type:e.type||'',date:e.date||'',guests:e.guests||'',location:e.location||'',email:e.email||'',phone:e.phone||'',startTime:e.startTime||'',endTime:e.endTime||'',price:e.price||'',address:e.address||'',venue:e.venue||'',notes:e.notes||''})));
+          data.events=legacy;
+          localStorage.removeItem('hjulmann-v5');
+          toast('✓ '+legacy.length+' events overført til sky');
+        }
+      }catch{}
+    }
   }catch{data.events=[];}
 }
 
