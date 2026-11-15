@@ -282,6 +282,7 @@ main{padding:20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-wi
   <div class="header-actions">
     <button class="btn btn-sm" onclick="exportData()">↓ CSV</button>
     <button class="btn btn-sm" onclick="openModal()">Forespørgsel</button>
+    <button class="btn btn-sm" onclick="openQuickModal()">⚡ Hurtig</button>
     <button class="btn btn-dark btn-sm" onclick="openEvtModal()">+ Ny aftale</button>
   </div>
 </header>
@@ -329,6 +330,26 @@ main{padding:20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));max-wi
     <div id="evt-list"></div>
   </div>
 </main>
+
+<!-- Hurtig aftale modal -->
+<div class="overlay" id="overlay-quick" onclick="if(event.target.id==='overlay-quick')closeQuickModal()">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-head">
+      <h2>⚡ Hurtig aftale</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeQuickModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Dato *</label><input id="q-date" type="date" /></div>
+      <div class="fg"><label>Sted</label><input id="q-location" placeholder="By / venue" /></div>
+      <div class="fg"><label>Honorar (kr)</label><input id="q-price" type="number" placeholder="0" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeQuickModal()">Annuller</button>
+      <button class="btn btn-dark" onclick="addQuickEvent()">Opret</button>
+    </div>
+  </div>
+</div>
 
 <!-- Forespørgsel modal -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
@@ -698,6 +719,18 @@ function overlayClick(e){if(e.target.id==='overlay')closeModal();}
 function openEvtModal(){document.getElementById('overlay-evt').classList.add('open');}
 function closeEvtModal(){document.getElementById('overlay-evt').classList.remove('open');}
 function overlayEvtClick(e){if(e.target.id==='overlay-evt')closeEvtModal();}
+function openQuickModal(){document.getElementById('q-date').value=new Date().toISOString().slice(0,10);document.getElementById('overlay-quick').classList.add('open');setTimeout(()=>document.getElementById('q-date').focus(),100);}
+function closeQuickModal(){document.getElementById('overlay-quick').classList.remove('open');}
+function addQuickEvent(){
+  const date=document.getElementById('q-date').value;
+  if(!date){alert('Dato er påkrævet.');return;}
+  const ev={id:uid(),name:'DJ job',type:'Firmafest',date,location:document.getElementById('q-location').value.trim(),price:document.getElementById('q-price').value,guests:'',email:'',phone:'',startTime:'',endTime:'',address:'',venue:'',notes:''};
+  data.events.push(ev);saveLocal({events:data.events});
+  closeQuickModal();toast('⚡ Aftale oprettet');
+  ['q-location','q-price'].forEach(id=>document.getElementById(id).value='');
+  renderOverview();renderEvents();
+  switchTab('events',document.querySelectorAll('.tab-btn')[2]);
+}
 
 async function addInquiry(){
   const name=document.getElementById('m-name').value.trim();
