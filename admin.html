@@ -342,7 +342,7 @@ input,textarea,select,.msg-box,.val a{-webkit-user-select:text;user-select:text;
     </div>
     <div class="modal-body">
       <div class="fg"><label>Kunde</label><div id="offer-to" style="font-size:14px;font-weight:600;padding:4px 0;"></div></div>
-      <div class="fg"><label>Pris (kr) *</label><input id="offer-price" type="number" placeholder="0" /></div>
+      <div class="fg"><label>Pris (kr) *</label><input id="offer-price" type="number" placeholder="0" oninput="updateOfferMsg()" /></div>
       <div class="fg"><label>Besked til kunden</label><textarea id="offer-msg" rows="4" placeholder="Hej! Tak for din forespørgsel. Jeg kan tilbyde dig..."></textarea></div>
     </div>
     <div class="modal-foot">
@@ -754,18 +754,25 @@ function overlayClick(e){if(e.target.id==='overlay')closeModal();}
 function openEvtModal(){document.getElementById('overlay-evt').classList.add('open');}
 function closeEvtModal(){document.getElementById('overlay-evt').classList.remove('open');}
 function overlayEvtClick(e){if(e.target.id==='overlay-evt')closeEvtModal();}
-let offerInqId=null;
+let offerInqId=null,offerInqCache=null;
+function buildOfferMsg(q,price){
+  const p=price?parseFloat(price).toLocaleString('da-DK')+' kr':'______ kr';
+  return`Hej ${q.name.split(' ')[0]}!\n\nTak for din forespørgsel — det lyder som et fedt event!\n\nJeg kan tilbyde dig DJ til jeres ${(q.type||'event').toLowerCase()}${q.date?' d. '+fmtDate(q.date):''}${q.location?' i '+q.location:''}.\n\nMin pris for aftenen er ${p}.\n\nSkriv endelig tilbage hvis du har spørgsmål eller vil booke — så laver vi det officielt.\n\nMed venlig hilsen\nAlexander Hjulmann\nHjulmann Events\ninfo@hjulmann-events.dk`;
+}
+function updateOfferMsg(){
+  if(!offerInqCache)return;
+  const price=document.getElementById('offer-price').value;
+  document.getElementById('offer-msg').value=buildOfferMsg(offerInqCache,price);
+}
 function openOfferModal(id){
   const q=data.inquiries.find(i=>i.id===id);if(!q)return;
-  offerInqId=id;
-  const priceEl=document.getElementById('price-'+id);
+  offerInqId=id;offerInqCache=q;
   document.getElementById('offer-to').textContent=q.name+' · '+q.email;
-  document.getElementById('offer-price').value=priceEl?.value||q.price||'';
-  const p=priceEl?.value||q.price||'';
-  document.getElementById('offer-msg').value=`Hej ${q.name.split(' ')[0]}!\n\nTak for din forespørgsel — det lyder som et fedt event!\n\nJeg kan tilbyde dig DJ til jeres ${(q.type||'event').toLowerCase()}${q.date?' d. '+fmtDate(q.date):''}${q.location?' i '+q.location:''}.\n\nMin pris for aftenen er ${p?parseFloat(p).toLocaleString('da-DK')+' kr':'______ kr'}.\n\nSkriv endelig tilbage hvis du har spørgsmål eller vil booke — så laver vi det officielt.\n\nMed venlig hilsen\nAlexander Hjulmann\nHjulmann Events\ninfo@hjulmann-events.dk`;
+  document.getElementById('offer-price').value=q.price||'';
+  document.getElementById('offer-msg').value=buildOfferMsg(q,q.price||'');
   document.getElementById('overlay-offer').classList.add('open');
 }
-function closeOfferModal(){document.getElementById('overlay-offer').classList.remove('open');offerInqId=null;}
+function closeOfferModal(){document.getElementById('overlay-offer').classList.remove('open');offerInqId=null;offerInqCache=null;}
 function sendOffer(){
   const q=data.inquiries.find(i=>i.id===offerInqId);if(!q)return;
   const price=document.getElementById('offer-price').value;
