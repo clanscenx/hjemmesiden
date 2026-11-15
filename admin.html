@@ -284,7 +284,7 @@ main { padding:24px;max-width:900px;width:100%;margin:0 auto; }
     <div class="modal-body">
       <div class="form-row">
         <div class="fg"><label>Navn *</label><input id="m-name" placeholder="Fuldt navn" /></div>
-        <div class="fg"><label>Email *</label><input id="m-email" type="email" placeholder="din@email.dk" /></div>
+        <div class="fg"><label>Email</label><input id="m-email" type="email" placeholder="din@email.dk" /></div>
       </div>
       <div class="form-row">
         <div class="fg"><label>Telefon</label><input id="m-phone" type="tel" placeholder="12 34 56 78" /></div>
@@ -594,7 +594,7 @@ function overlayClick(e){if(e.target.id==='overlay')closeModal();}
 async function addInquiry(){
   const name=document.getElementById('m-name').value.trim();
   const email=document.getElementById('m-email').value.trim();
-  if(!name||!email){alert('Navn og email er påkrævet.');return;}
+  if(!name){alert('Navn er påkrævet.');return;}
   const inq={name,email,phone:document.getElementById('m-phone').value.trim(),type:document.getElementById('m-type').value,date:document.getElementById('m-date').value,guests:document.getElementById('m-guests').value,location:document.getElementById('m-location').value.trim(),msg:document.getElementById('m-msg').value.trim(),unread:true,price:''};
   await sbPost('/rest/v1/inquiries',inq);
   closeModal();toast('Forespørgsel tilføjet');
